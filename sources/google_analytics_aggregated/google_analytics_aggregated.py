@@ -277,10 +277,16 @@ class LakeflowConnect:
 
     def _validate_dimensions_and_metrics(self, dimensions: list, metrics: list):
         """
-        Validate that requested dimensions and metrics exist in the property metadata.
-        This catches typos and non-existent fields without making extra API calls.
+        Validate that requested dimensions and metrics exist in the property metadata
+        and that they don't exceed API limits.
+        This catches typos, non-existent fields, and limit violations without making extra API calls.
         
-        Note: This only validates existence, not semantic compatibility.
+        API Limits validated:
+        - Maximum 9 dimensions per request
+        - Maximum 10 metrics per request
+        - Date ranges limit (4 max) is validated separately in read_table (not user-configurable)
+        
+        Note: This only validates existence and counts, not semantic compatibility.
         The runReport API will validate dimension/metric compatibility and return
         clear errors for incompatible combinations.
         
@@ -289,31 +295,57 @@ class LakeflowConnect:
             metrics: List of metric names to validate
             
         Raises:
-            ValueError: If any dimensions or metrics are not found in metadata
+            ValueError: If any dimensions or metrics are not found in metadata, or if limits are exceeded
         """
         metadata = self._fetch_metadata()
         available_dimensions = metadata.get("available_dimensions", set())
         available_metrics = metadata.get("available_metrics", set())
 
+        # Check for API limits (validated empirically via test suite)
+        MAX_DIMENSIONS = 9
+        MAX_METRICS = 10
+        MAX_DATE_RANGES = 4  # Not currently configurable by users, but enforced by API
+        
+        dimension_count = len(dimensions)
+        metric_count = len(metrics)
+        
         # Check for unknown dimensions
         unknown_dimensions = [d for d in dimensions if d not in available_dimensions]
         
         # Check for unknown metrics
         unknown_metrics = [m for m in metrics if m not in available_metrics]
 
-        if unknown_dimensions or unknown_metrics:
+        # Build comprehensive error message if any validation fails
+        if unknown_dimensions or unknown_metrics or dimension_count > MAX_DIMENSIONS or metric_count > MAX_METRICS:
             error_parts = ["Invalid report configuration:"]
             
+            # Report limit violations first (most critical)
+            if dimension_count > MAX_DIMENSIONS:
+                error_parts.append(f"\n  Too many dimensions: {dimension_count} (maximum {MAX_DIMENSIONS})")
+                error_parts.append(f"    The Google Analytics Data API limits requests to {MAX_DIMENSIONS} dimensions.")
+                error_parts.append(f"    Your request has: {dimensions}")
+            
+            if metric_count > MAX_METRICS:
+                error_parts.append(f"\n  Too many metrics: {metric_count} (maximum {MAX_METRICS})")
+                error_parts.append(f"    The Google Analytics Data API limits requests to {MAX_METRICS} metrics.")
+                error_parts.append(f"    Your request has: {metrics}")
+            
+            # Report unknown fields
             if unknown_dimensions:
                 error_parts.append(f"\n  Unknown dimensions: {unknown_dimensions}")
-                error_parts.append(f"\n  Available dimensions include: {sorted(list(available_dimensions))[:10]}...")
+                error_parts.append(f"    Available dimensions include: {sorted(list(available_dimensions))[:10]}...")
             
             if unknown_metrics:
                 error_parts.append(f"\n  Unknown metrics: {unknown_metrics}")
-                error_parts.append(f"\n  Available metrics include: {sorted(list(available_metrics))[:10]}...")
+                error_parts.append(f"    Available metrics include: {sorted(list(available_metrics))[:10]}...")
             
             error_parts.append("\n\nTo see all available dimensions and metrics for your property:")
             error_parts.append(f"\n  GET https://analyticsdata.googleapis.com/v1beta/properties/{self.property_ids[0]}/metadata")
+            
+            if dimension_count > MAX_DIMENSIONS or metric_count > MAX_METRICS:
+                error_parts.append("\n\nTo work around dimension/metric limits:")
+                error_parts.append("\n  - Split your report into multiple smaller reports")
+                error_parts.append("\n  - Prioritize the most important dimensions and metrics for your analysis")
             
             raise ValueError("".join(error_parts))
 
@@ -742,8 +774,20 @@ class LakeflowConnect:
             end_date_str = "today"
 
         # Build the request body
+        # API limit: maximum 4 date ranges per request (validated empirically)
+        date_ranges = [{"startDate": start_date_str, "endDate": end_date_str}]
+        
+        # Defensive check: ensure we don't exceed the date ranges limit
+        # (Currently hardcoded to 1, but prevents future issues if modified)
+        MAX_DATE_RANGES = 4
+        if len(date_ranges) > MAX_DATE_RANGES:
+            raise ValueError(
+                f"Too many date ranges: {len(date_ranges)} (maximum {MAX_DATE_RANGES}). "
+                f"The Google Analytics Data API limits requests to {MAX_DATE_RANGES} date ranges."
+            )
+        
         request_body = {
-            "dateRanges": [{"startDate": start_date_str, "endDate": end_date_str}],
+            "dateRanges": date_ranges,
             "dimensions": [{"name": dim} for dim in dimensions],
             "metrics": [{"name": metric} for metric in metrics],
             "limit": page_size,

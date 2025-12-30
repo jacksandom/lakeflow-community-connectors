@@ -336,8 +336,8 @@ Optional overrides:
 
 | Option | Type | Required | Default | Description |
 |--------|------|----------|---------|-------------|
-| `dimensions` | string (JSON array) | yes | N/A | List of dimension names as a JSON string (e.g., `"[\"date\", \"country\"]"`). Up to 9 dimensions. |
-| `metrics` | string (JSON array) | yes | N/A | List of metric names as a JSON string (e.g., `"[\"activeUsers\", \"sessions\"]"`). At least 1 metric required, up to 10 metrics. |
+| `dimensions` | string (JSON array) | yes | N/A | List of dimension names as a JSON string (e.g., `"[\"date\", \"country\"]"`). **API Limit: Maximum 9 dimensions per report.** The connector validates this before making API calls. |
+| `metrics` | string (JSON array) | yes | N/A | List of metric names as a JSON string (e.g., `"[\"activeUsers\", \"sessions\"]"`). At least 1 metric required. **API Limit: Maximum 10 metrics per report.** The connector validates this before making API calls. |
 | `primary_keys` | array | yes | N/A | Composite key starting with `"property_id"` followed by all dimension names (e.g., `["property_id", "date", "country"]`). **Must always start with `"property_id"`** for schema stability. <!-- TODO: Remove this redundant requirement --> |
 | `start_date` | string | no | `"30daysAgo"` | Initial start date for first sync. Can be YYYY-MM-DD format or relative like `"30daysAgo"`, `"7daysAgo"`, `"yesterday"`. |
 | `lookback_days` | string | no | `"3"` | Number of days to look back for incremental syncs (accounts for data processing delays). |
@@ -350,6 +350,7 @@ Optional overrides:
 > - For **custom reports**: `dimensions`, `metrics`, and filter options must be provided as **JSON strings** (e.g., `"[\"date\", \"country\"]"`)
 > - `primary_keys` is a **native array** (e.g., `["property_id", "date", "country"]`) and **must always start with `"property_id"`** for schema stability
 > - All other options are regular strings (e.g., `"30daysAgo"`, `"3"`)
+> - **API Limits Validation**: The connector automatically validates that your report configuration doesn't exceed API limits (9 dimensions, 10 metrics) before making requests. If limits are exceeded, you'll receive a clear error message with suggestions for splitting your report.
 
 ### Common Dimensions and Metrics
 
@@ -404,7 +405,7 @@ This is useful for discovering custom dimensions/metrics defined in your GA4 pro
   - **String Dimensions** (all others): `StringType`
   - **Integer Metrics** (`activeUsers`, `sessions`, etc.): `LongType` (64-bit integer)
   - **Float Metrics** (`engagementRate`, `bounceRate`, etc.): `DoubleType` (64-bit float)
-- **Validation**: The connector validates that requested dimensions and metrics exist in your property, catching typos and non-existent fields before making data requests.
+- **Validation**: The connector validates that requested dimensions and metrics exist in your property and don't exceed API limits, catching typos, non-existent fields, and limit violations before making data requests.
 
 ## Data Type Mapping
 
@@ -656,6 +657,12 @@ The connector automatically handles rate limiting with exponential backoff and r
 
 ## Known Limitations
 
+- **API Request Limits**: The Google Analytics Data API enforces the following limits per request:
+  - **Maximum 9 dimensions** per report
+  - **Maximum 10 metrics** per report
+  - **Maximum 4 date ranges** per request (not user-configurable; connector uses 1 date range)
+  - The connector validates dimensions and metrics limits before making API calls and provides clear error messages if exceeded
+  - To work with more dimensions or metrics, split your report into multiple separate reports
 - **Data Freshness**: Google Analytics data is typically processed within 24-48 hours. Recent data may be incomplete or updated as processing completes.
 - **Sampling**: Very large queries may be sampled by Google Analytics. Breaking queries into smaller date ranges can help avoid sampling.
 - **Thresholding**: Google applies data thresholding for privacy when volumes are low. Some small metric values may be withheld.
@@ -684,6 +691,9 @@ The connector uses the following Google Analytics Data API endpoints:
 - **Schema generation**: < 0.1 seconds (uses cached metadata)
 - **Data fetching**: Varies by report size (10,000 rows/page, automatic pagination)
 - **Validation**: Zero additional API calls (uses cached metadata)
+  - Validates dimension/metric existence (catches typos)
+  - Validates API limits (9 dimensions max, 10 metrics max)
+  - Catches errors before making expensive data requests
 
 ### Design Decisions
 

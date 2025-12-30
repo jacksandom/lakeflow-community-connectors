@@ -417,8 +417,115 @@ def test_google_analytics_aggregated_connector():
         print(f"❌ FAILED: {str(e)}")
         raise
 
+    # Test 17: API Limit - 10 dimensions (exceeds maximum of 9)
     print("\n" + "="*50)
-    print("ALL TESTS PASSED (INCLUDING MULTI-PROPERTY SUPPORT)")
+    print("TEST: API Limit - 10 dimensions (exceeds maximum of 9)")
     print("="*50)
+    
+    ten_dimensions_options = {
+        "dimensions": '["date", "country", "city", "deviceCategory", "browser", "operatingSystem", "language", "sessionSource", "sessionMedium", "newVsReturning"]',
+        "metrics": '["activeUsers"]',
+        "primary_keys": ["property_id", "date", "country", "city", "deviceCategory", "browser", "operatingSystem", "language", "sessionSource", "sessionMedium", "newVsReturning"],
+        "start_date": "7daysAgo"
+    }
+    
+    try:
+        schema = connector.get_table_schema("test_10_dimensions", ten_dimensions_options)
+        print("❌ FAILED: 10 dimensions should have been rejected by validation")
+        raise AssertionError("Validation accepted 10 dimensions, expected rejection")
+    except ValueError as e:
+        error_msg = str(e)
+        assert "Too many dimensions" in error_msg and "maximum 9" in error_msg, \
+            f"Expected dimension limit error, got: {error_msg}"
+        print(f"✅ PASSED: Validation caught 10 dimensions before API call")
 
+    # Test 18: API Limit - 11 metrics (exceeds maximum of 10)
+    print("\n" + "="*50)
+    print("TEST: API Limit - 11 metrics (exceeds maximum of 10)")
+    print("="*50)
+    
+    eleven_metrics_options = {
+        "dimensions": '["date"]',
+        "metrics": '["activeUsers", "sessions", "screenPageViews", "eventCount", "newUsers", "engagementRate", "averageSessionDuration", "bounceRate", "sessionsPerUser", "screenPageViewsPerSession", "totalUsers"]',
+        "primary_keys": ["property_id", "date"],
+        "start_date": "7daysAgo"
+    }
+    
+    try:
+        schema = connector.get_table_schema("test_11_metrics", eleven_metrics_options)
+        print("❌ FAILED: 11 metrics should have been rejected by validation")
+        raise AssertionError("Validation accepted 11 metrics, expected rejection")
+    except ValueError as e:
+        error_msg = str(e)
+        assert "Too many metrics" in error_msg and "maximum 10" in error_msg, \
+            f"Expected metric limit error, got: {error_msg}"
+        print(f"✅ PASSED: Validation caught 11 metrics before API call")
 
+    # Test 19: Validation - Combined limits and unknown fields
+    print("\n" + "="*50)
+    print("TEST: Validation catches combined issues (limits + unknown fields)")
+    print("="*50)
+    
+    try:
+        combined_validation = {
+            "dimensions": '["date", "country", "city", "deviceCategory", "browser", "operatingSystem", "language", "sessionSource", "sessionMedium", "invalidDim"]',
+            "metrics": '["activeUsers", "sessions", "screenPageViews", "eventCount", "newUsers", "engagementRate", "averageSessionDuration", "bounceRate", "sessionsPerUser", "screenPageViewsPerSession", "invalidMetric"]',
+            "start_date": "7daysAgo"
+        }
+        schema = connector.get_table_schema("test_validation_combined", combined_validation)
+        print(f"❌ FAILED: Validation should have caught multiple issues")
+        raise AssertionError("Combined validation not working")
+    except ValueError as e:
+        error_msg = str(e)
+        assert "Too many dimensions" in error_msg, "Error should mention dimension limit"
+        assert "Too many metrics" in error_msg, "Error should mention metric limit"
+        assert "Unknown dimensions" in error_msg or "invalidDim" in error_msg, "Error should mention unknown dimension"
+        assert "Unknown metrics" in error_msg or "invalidMetric" in error_msg, "Error should mention unknown metric"
+        print(f"✅ PASSED: Validation caught all issues (limits + unknown fields)")
+        print(f"  Error message covers dimension limits, metric limits, and unknown fields")
+    except Exception as e:
+        print(f"❌ FAILED: Wrong error type: {type(e).__name__}")
+        raise
+    
+    # Test 20: Date Ranges Limit - 5 date ranges (exceeds maximum of 4)
+    print("\n" + "="*50)
+    print("TEST: Date Ranges Limit - 5 date ranges (exceeds maximum of 4)")
+    print("="*50)
+    
+    try:
+        # Test with 5 date ranges by directly calling the API
+        request_body_5_ranges = {
+            "dateRanges": [
+                {"startDate": "2024-01-01", "endDate": "2024-01-07"},
+                {"startDate": "2024-01-08", "endDate": "2024-01-14"},
+                {"startDate": "2024-01-15", "endDate": "2024-01-21"},
+                {"startDate": "2024-01-22", "endDate": "2024-01-28"},
+                {"startDate": "2024-01-29", "endDate": "2024-02-04"}
+            ],
+            "dimensions": [{"name": "date"}],
+            "metrics": [{"name": "activeUsers"}],
+            "limit": 100
+        }
+        
+        # Call the API directly using the connector's internal method
+        response = connector._make_api_request(
+            "runReport",
+            request_body_5_ranges,
+            connector.property_ids[0]
+        )
+        
+        print(f"❌ FAILED: 5 date ranges should have been rejected by API")
+        raise AssertionError("API accepted 5 date ranges, expected rejection")
+        
+    except AssertionError:
+        raise
+    except Exception as e:
+        error_msg = str(e)
+        assert "400" in error_msg and "dateRange" in error_msg, \
+            f"Expected 400 error with dateRange limit message, got: {error_msg}"
+        print(f"✅ PASSED: 5 date ranges rejected by API")
+        print(f"  Error confirms limit: 'Requests are limited to 4 dateRanges'")
+    
+    print("\n" + "="*50)
+    print("ALL TESTS PASSED")
+    print("="*50)
