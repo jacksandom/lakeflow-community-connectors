@@ -213,14 +213,13 @@ def test_google_analytics_aggregated_connector():
     print(f"✅ PASSED: Loaded {len(prebuilt_reports)} prebuilt reports")
     print(f"  Available reports: {', '.join(sorted(prebuilt_reports.keys()))}")
 
-    # Test 10: Using prebuilt report
+    # Test 10: Using prebuilt report (primary_keys auto-inferred from dimensions)
     print("\n" + "="*50)
     print("TEST: Using prebuilt report (traffic_by_country)")
     print("="*50)
     
     prebuilt_table_options = {
-        "prebuilt_report": "traffic_by_country",
-        "primary_keys": ["date", "country"]
+        "prebuilt_report": "traffic_by_country"
     }
     
     try:
@@ -233,14 +232,13 @@ def test_google_analytics_aggregated_connector():
         print(f"❌ FAILED: {str(e)}")
         raise
 
-    # Test 11: Prebuilt report with overrides
+    # Test 11: Prebuilt report with overrides (primary_keys still auto-inferred)
     print("\n" + "="*50)
     print("TEST: Prebuilt report with overrides")
     print("="*50)
     
     override_options = {
         "prebuilt_report": "traffic_by_country",
-        "primary_keys": ["date", "country"],
         "start_date": "7daysAgo",
         "lookback_days": "1"
     }
@@ -344,16 +342,16 @@ def test_google_analytics_aggregated_connector():
         print(f"❌ FAILED: {str(e)}")
         raise
 
-    # Test 15: Shadowing prebuilt report name with custom config
+    # Test 15: Shadowing prebuilt report name with custom config (auto-inferred primary_keys)
     print("\n" + "="*50)
     print("TEST: Shadowing prebuilt report name with custom config")
     print("="*50)
     
     # Use prebuilt name but provide custom dimensions (should override)
+    # Primary keys should be auto-inferred from dimensions
     shadow_options = {
         "dimensions": '["date", "city"]',  # Different from prebuilt!
-        "metrics": '["sessions"]',
-        "primary_keys": ["property_id", "date", "city"]  # Always include property_id
+        "metrics": '["sessions"]'
     }
     
     try:
@@ -365,15 +363,15 @@ def test_google_analytics_aggregated_connector():
         print(f"✅ Custom dimensions override prebuilt report")
         print(f"  Fields: {', '.join(field_names)}")
         
-        # Metadata should also use custom config
+        # Metadata should auto-infer primary_keys from dimensions
         metadata = connector.read_table_metadata("traffic_by_country", shadow_options)
         expected_shadow_keys = ["property_id", "date", "city"]
         assert metadata["primary_keys"] == expected_shadow_keys, \
-            f"Should use custom primary_keys: {expected_shadow_keys}"
-        print(f"✅ Custom primary_keys override prebuilt report")
+            f"Should auto-infer primary_keys: {expected_shadow_keys}"
+        print(f"✅ Primary keys auto-inferred from dimensions")
         print(f"  Primary keys: {metadata['primary_keys']}")
         
-        print(f"\n✅ PASSED: Can shadow prebuilt report names with explicit dimensions")
+        print(f"\n✅ PASSED: Can shadow prebuilt report names with custom dimensions")
     except Exception as e:
         print(f"❌ FAILED: {str(e)}")
         raise
@@ -417,6 +415,32 @@ def test_google_analytics_aggregated_connector():
         print(f"❌ FAILED: {str(e)}")
         raise
 
+    # Test 16b: Explicit primary_keys (backward compatibility)
+    print("\n" + "="*50)
+    print("TEST: Explicit primary_keys override auto-inference (backward compatibility)")
+    print("="*50)
+    
+    try:
+        # Test with custom report that explicitly defines primary_keys
+        explicit_pk_options = {
+            "dimensions": '["date", "country", "city"]',
+            "metrics": '["sessions"]',
+            "primary_keys": ["property_id", "city", "date"],  # Non-standard order
+            "start_date": "7daysAgo"
+        }
+        
+        metadata = connector.read_table_metadata("custom_explicit_pk", explicit_pk_options)
+        
+        # Should respect the explicit primary_keys order
+        assert metadata["primary_keys"] == ["property_id", "city", "date"], \
+            f"Should use explicit primary_keys in specified order, got: {metadata['primary_keys']}"
+        print(f"✅ Explicit primary_keys respected: {metadata['primary_keys']}")
+        
+        print(f"\n✅ PASSED: Explicit primary_keys still work (backward compatibility)")
+    except Exception as e:
+        print(f"❌ FAILED: {str(e)}")
+        raise
+
     # Test 17: API Limit - 10 dimensions (exceeds maximum of 9)
     print("\n" + "="*50)
     print("TEST: API Limit - 10 dimensions (exceeds maximum of 9)")
@@ -425,7 +449,6 @@ def test_google_analytics_aggregated_connector():
     ten_dimensions_options = {
         "dimensions": '["date", "country", "city", "deviceCategory", "browser", "operatingSystem", "language", "sessionSource", "sessionMedium", "newVsReturning"]',
         "metrics": '["activeUsers"]',
-        "primary_keys": ["property_id", "date", "country", "city", "deviceCategory", "browser", "operatingSystem", "language", "sessionSource", "sessionMedium", "newVsReturning"],
         "start_date": "7daysAgo"
     }
     
@@ -447,7 +470,6 @@ def test_google_analytics_aggregated_connector():
     eleven_metrics_options = {
         "dimensions": '["date"]',
         "metrics": '["activeUsers", "sessions", "screenPageViews", "eventCount", "newUsers", "engagementRate", "averageSessionDuration", "bounceRate", "sessionsPerUser", "screenPageViewsPerSession", "totalUsers"]',
-        "primary_keys": ["property_id", "date"],
         "start_date": "7daysAgo"
     }
     

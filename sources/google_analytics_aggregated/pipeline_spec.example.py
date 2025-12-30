@@ -24,9 +24,10 @@ source_name = "google_analytics_aggregated"
 #
 # 2. CUSTOM REPORTS (For specific needs)
 #    - Use any source_table name you want
-#    - Manually specify dimensions, metrics, and primary_keys
+#    - Manually specify dimensions and metrics
 #    - Full control over report configuration
-#    - Required fields: dimensions, metrics, primary_keys
+#    - Required fields: dimensions, metrics
+#    - Primary keys are automatically inferred from dimensions
 #
 # =============================================================================
 #
@@ -52,10 +53,8 @@ source_name = "google_analytics_aggregated"
 #             FOR CUSTOM REPORTS (Required):
 #             ├── dimensions (required): JSON array e.g., '["date", "country"]'
 #             ├── metrics (required): JSON array e.g., '["activeUsers", "sessions"]'
-#             ├── primary_keys (required): List with "property_id" first, then dimensions
-#             │                            e.g., ["property_id", "date", "country"]
-#             │                            TODO: This is redundant but required due to
-#             │                            architectural limitation. See connector code.
+#             ├── primary_keys (optional): Defaults to ["property_id"] + dimensions
+#             │                            Can override if needed, e.g., ["property_id", "date"]
 #             ├── start_date (optional): Initial date range start (default: "30daysAgo")
 #             ├── lookback_days (optional): Days to look back (default: 3)
 #             ├── page_size (optional): Records per request (default: 10000, max: 100000)
@@ -70,7 +69,7 @@ reports = [
     {
         "table": {
             "source_table": "traffic_by_country",  # Matches prebuilt report name
-            # No table_configuration needed - dimensions, metrics, and primary_keys are automatic
+            # No table_configuration needed - dimensions, metrics, and primary keys are automatic
             # Optionally override defaults like start_date, lookback_days, filters:
             # "table_configuration": {
             #     "start_date": "90daysAgo",
@@ -85,7 +84,6 @@ reports = [
             "table_configuration": {
                 "dimensions": '["date", "deviceCategory"]',
                 "metrics": '["activeUsers", "engagementRate", "averageSessionDuration"]',
-                "primary_keys": ["property_id", "date", "deviceCategory"],
                 "start_date": "90daysAgo",
                 "lookback_days": "3",
                 "page_size": "5000",
@@ -100,7 +98,6 @@ reports = [
             "table_configuration": {
                 "dimensions": '["date", "platform", "browser"]',
                 "metrics": '["sessions"]',
-                "primary_keys": ["property_id", "date", "platform", "browser"],
                 "start_date": "7daysAgo",
                 "lookback_days": "3",
                 "dimension_filter": '{"filter": {"fieldName": "platform", "stringFilter": {"matchType": "EXACT", "value": "web"}}}',
@@ -115,7 +112,6 @@ reports = [
             "table_configuration": {
                 "dimensions": '["country"]',
                 "metrics": '["totalUsers", "sessions"]',
-                "primary_keys": ["property_id", "country"],
                 "start_date": "2020-01-01",
                 "scd_type": "SCD_TYPE_1",
             },
@@ -135,7 +131,7 @@ pipeline_spec = {
 # - traffic_by_country: Daily active users, sessions, and page views by country
 #
 # To use a prebuilt report, just use its name as the source_table
-# No need to specify dimensions, metrics, or primary_keys - it's all automatic.
+# No need to specify dimensions, metrics, or primary keys - it's all automatic.
 #
 # RESERVED NAMES: Prebuilt report names are "reserved" to enable zero-config usage.
 # If you need a custom report with a prebuilt name, provide explicit "dimensions"
