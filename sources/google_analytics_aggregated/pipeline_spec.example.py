@@ -126,13 +126,9 @@ pipeline_spec = {
 }
 
 # =============================================================================
-# AVAILABLE PREBUILT REPORTS (5 reports)
+# AVAILABLE PREBUILT REPORTS
 # =============================================================================
 # - traffic_by_country: Daily active users, sessions, and page views by country
-# - user_acquisition: Daily traffic sources and campaign performance
-# - events_summary: Daily event breakdown by event name
-# - page_performance: Daily page views by page path and title
-# - device_breakdown: Daily users by device category and browser
 #
 # To use a prebuilt report, just use its name as the source_table
 # No need to specify dimensions, metrics, or primary keys - it's all automatic.
@@ -140,6 +136,8 @@ pipeline_spec = {
 # RESERVED NAMES: Prebuilt report names are "reserved" to enable zero-config usage.
 # If you need a custom report with a prebuilt name, provide explicit "dimensions"
 # in table_configuration to override (though a different name is recommended).
+#
+# More prebuilt reports can be added to prebuilt_reports.json as needed.
 # =============================================================================
 
 # =============================================================================
