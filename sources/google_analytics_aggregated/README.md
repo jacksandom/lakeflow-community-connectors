@@ -210,10 +210,6 @@ The connector includes predefined report configurations for common analytics nee
 | Report Name | Description | Dimensions | Metrics | Primary Keys |
 |-------------|-------------|------------|---------|--------------|
 | `traffic_by_country` | Daily active users, sessions, and page views by country | `date`, `country` | `activeUsers`, `sessions`, `screenPageViews` | `["property_id", "date", "country"]` |
-| `user_acquisition` | Daily traffic sources and campaign performance | `date`, `sessionSource`, `sessionMedium` | `sessions`, `activeUsers`, `newUsers`, `engagementRate` | `["property_id", "date", "sessionSource", "sessionMedium"]` |
-| `events_summary` | Daily event breakdown by event name | `date`, `eventName` | `eventCount`, `activeUsers` | `["property_id", "date", "eventName"]` |
-| `page_performance` | Daily page views by page path and title | `date`, `pagePath`, `pageTitle` | `screenPageViews`, `averageSessionDuration`, `bounceRate` | `["property_id", "date", "pagePath", "pageTitle"]` |
-| `device_breakdown` | Daily users by device category and browser | `date`, `deviceCategory`, `browser` | `activeUsers`, `sessions`, `engagementRate` | `["property_id", "date", "deviceCategory", "browser"]` |
 
 > **Note**: The `property_id` field is **always automatically included** as the first element in primary keys for schema stability.
 
@@ -253,7 +249,7 @@ No `table_configuration` needed. The connector automatically knows:
 
 > **Reserved Names**: Prebuilt report names are reserved for automatic configuration. To use a custom report with a prebuilt name, explicitly provide `dimensions` in `table_configuration` (though a different name is recommended to avoid confusion).
 
-> **Note**: The connector ships with 5 prebuilt reports covering common analytics use cases. More reports can be added to `prebuilt_reports.json` as needed. You can also request additional common reports to be included.
+> **Note**: More prebuilt reports can be added to `prebuilt_reports.json` as needed. You can also request additional common reports to be included.
 
 ### 2. Custom Reports (For Specific Needs)
 
