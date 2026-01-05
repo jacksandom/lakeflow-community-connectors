@@ -693,18 +693,22 @@ def register_lakeflow_source(spark):
                 # Load configuration from prebuilt report (no override)
                 report_config = prebuilt_reports[table_name]
 
-                # Primary keys are defined in the prebuilt report
-                primary_keys = report_config.get("primary_keys", [])
-
-                # Always prepend 'property_id' field to primary keys for schema stability
-                primary_keys = ["property_id"] + primary_keys
-
-                # Parse dimensions to determine cursor field
+                # Parse dimensions to determine primary keys and cursor field
                 dimensions_json = report_config.get("dimensions", "[]")
                 try:
                     dimensions = json.loads(dimensions_json)
                 except json.JSONDecodeError:
                     dimensions = []
+
+                # Primary keys: Use explicit primary_keys if defined in prebuilt config, otherwise infer from dimensions
+                # Always prepend 'property_id' field for schema stability
+                explicit_primary_keys = report_config.get("primary_keys")
+                if explicit_primary_keys:
+                    # Prebuilt report defines explicit primary_keys
+                    primary_keys = ["property_id"] + explicit_primary_keys
+                else:
+                    # Infer from dimensions
+                    primary_keys = ["property_id"] + dimensions
 
                 # Determine cursor field and ingestion type
                 cursor_field = None
@@ -746,38 +750,15 @@ def register_lakeflow_source(spark):
             if not isinstance(dimensions, list):
                 raise ValueError("'dimensions' must be a JSON array of strings")
 
-            # TODO: UX IMPROVEMENT - Remove need to explicitly specify primary_keys
-            #
-            # ARCHITECTURAL ISSUE: The ingestion pipeline calls _get_table_metadata() BEFORE
-            # table configurations are available (line 124 in ingestion_pipeline.py). The 
-            # metadata call only passes table names via tableNameList, not table_options.
-            #
-            # For Google Analytics Aggregated, primary_keys are derived FROM dimensions 
-            # (in table_options), so read_table_metadata() receives empty table_options 
-            # and returns empty primary_keys, causing "APPLY CHANGES query requires at 
-            # least one join key" errors.
-            #
-            # WORKAROUND: For prebuilt reports, use the report name as source_table directly.
-            # The connector can then look up primary_keys from prebuilt_reports.json by name.
-            #
-            # For custom reports, the fix still requires changes in ingestion_pipeline.py:
-            # 1. Get table configurations before metadata retrieval (before line 124):
-            #      table_configs = {t: spec.get_table_configuration(t) for t in table_list}
-            # 2. Pass table_configs to _get_table_metadata():
-            #      metadata = _get_table_metadata(spark, connection_name, table_list, table_configs)
-            # 3. Modify _get_table_metadata() to call metadata per-table with .options(**table_config):
-            #      df = spark.read.format("lakeflow_connect")
-            #            .option("databricks.connection", connection_name)
-            #            .option("tableName", "_lakeflow_metadata")
-            #            .option("tableNameList", table_name)  # Single table
-            #            .options(**table_config)  # Include table-specific options!
-            #            .load()
-            #
-            # Until fixed, users MUST explicitly specify primary_keys for custom reports.
-            #
-            # Primary keys are all dimensions (composite key)
+            # Primary keys: Use explicit primary_keys if provided, otherwise infer from dimensions
             # Always prepend 'property_id' field for schema stability
-            primary_keys = ["property_id"] + (dimensions if dimensions else [])
+            explicit_primary_keys = table_options.get("primary_keys")
+            if explicit_primary_keys:
+                # User provided explicit primary_keys - use as-is
+                primary_keys = explicit_primary_keys
+            else:
+                # Infer from dimensions: property_id + all dimensions
+                primary_keys = ["property_id"] + (dimensions if dimensions else [])
 
             # Determine cursor field and ingestion type
             # If 'date' dimension is present, use it as cursor for append ingestion
