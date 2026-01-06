@@ -10,7 +10,7 @@ the connector at runtime. It validates:
 - No duplicate report names
 - Reasonable API limits (max 9 dimensions, max 10 metrics)
 
-Run with: pytest tests/google_analytics_aggregated/test_prebuilt_config.py -v
+Run with: pytest sources/google_analytics_aggregated/test/test_prebuilt_config.py -v
 """
 
 import json
@@ -20,9 +20,7 @@ from pathlib import Path
 
 # Path to the prebuilt reports JSON file
 PREBUILT_REPORTS_PATH = (
-    Path(__file__).parent.parent.parent
-    / "sources"
-    / "google_analytics_aggregated"
+    Path(__file__).parent.parent
     / "prebuilt_reports.json"
 )
 

@@ -1,5 +1,6 @@
 from pipeline.ingestion_pipeline import ingest
 from libs.source_loader import get_register_function
+from sources.google_analytics_aggregated.google_analytics_aggregated import auto_fill_primary_keys
 
 source_name = "google_analytics_aggregated"
 
@@ -53,8 +54,8 @@ source_name = "google_analytics_aggregated"
 #             FOR CUSTOM REPORTS (Required):
 #             ├── dimensions (required): JSON array e.g., '["date", "country"]'
 #             ├── metrics (required): JSON array e.g., '["activeUsers", "sessions"]'
-#             ├── primary_keys (required): Array that must start with "property_id" followed by dimensions
-#             │                            e.g., ["property_id", "date", "country"]
+#             ├── primary_keys (auto-filled): Use auto_fill_primary_keys() to infer from dimensions
+#             │                               Or manually set as ["property_id"] + dimensions
 #             ├── start_date (optional): Initial date range start (default: "30daysAgo")
 #             ├── lookback_days (optional): Days to look back (default: 3)
 #             ├── page_size (optional): Records per request (default: 10000, max: 100000)
@@ -78,13 +79,13 @@ reports = [
     },
     
     # Example 2: Custom report with engagement metrics
+    # (primary_keys auto-filled as ["property_id", "date", "deviceCategory"])
     {
         "table": {
             "source_table": "engagement_by_device",
             "table_configuration": {
                 "dimensions": '["date", "deviceCategory"]',
                 "metrics": '["activeUsers", "engagementRate", "averageSessionDuration"]',
-                "primary_keys": ["property_id", "date", "deviceCategory"],
                 "start_date": "90daysAgo",
                 "lookback_days": "3",
                 "page_size": "5000",
@@ -93,13 +94,13 @@ reports = [
     },
     
     # Example 3: Custom report with filters
+    # (primary_keys auto-filled as ["property_id", "date", "platform", "browser"])
     {
         "table": {
             "source_table": "web_traffic_sources",
             "table_configuration": {
                 "dimensions": '["date", "platform", "browser"]',
                 "metrics": '["sessions"]',
-                "primary_keys": ["property_id", "date", "platform", "browser"],
                 "start_date": "7daysAgo",
                 "lookback_days": "3",
                 "dimension_filter": '{"filter": {"fieldName": "platform", "stringFilter": {"matchType": "EXACT", "value": "web"}}}',
@@ -108,13 +109,13 @@ reports = [
     },
     
     # Example 4: Custom snapshot report (no date dimension)
+    # (primary_keys auto-filled as ["property_id", "country"])
     {
         "table": {
             "source_table": "all_time_by_country", 
             "table_configuration": {
                 "dimensions": '["country"]',
                 "metrics": '["totalUsers", "sessions"]',
-                "primary_keys": ["property_id", "country"],
                 "start_date": "2020-01-01",
                 "scd_type": "SCD_TYPE_1",
             },
@@ -176,5 +177,5 @@ pipeline_spec = {
 register_lakeflow_source = get_register_function(source_name)
 register_lakeflow_source(spark)
 
-# Ingest the tables specified in the pipeline spec
-ingest(spark, pipeline_spec)
+# Auto-fill primary_keys from dimensions for custom reports, then ingest
+ingest(spark, auto_fill_primary_keys(pipeline_spec))
