@@ -415,9 +415,9 @@ def test_google_analytics_aggregated_connector():
         print(f"❌ FAILED: {str(e)}")
         raise
 
-    # Test 16b: Custom reports require explicit primary_keys
+    # Test 16b: Custom reports with/without explicit primary_keys
     print("\n" + "="*50)
-    print("TEST: Custom reports require explicit primary_keys")
+    print("TEST: Custom reports with/without explicit primary_keys")
     print("="*50)
     
     try:
@@ -434,25 +434,20 @@ def test_google_analytics_aggregated_connector():
             f"Should use explicit primary_keys in specified order, got: {metadata['primary_keys']}"
         print(f"✅ Custom report with explicit primary_keys works: {metadata['primary_keys']}")
         
-        # Test 2: Custom report WITHOUT primary_keys should fail with helpful error
+        # Test 2: Custom report WITHOUT primary_keys returns empty
+        # The framework's ingestion_pipeline.py line 137 will override with spec values
         without_pk_options = {
             "dimensions": '["date", "country"]',
             "metrics": '["sessions"]',
             "start_date": "7daysAgo"
         }
         
-        try:
-            metadata = connector.read_table_metadata("custom_without_pk", without_pk_options)
-            print("❌ FAILED: Should have raised error for missing primary_keys")
-            raise AssertionError("Expected ValueError for missing primary_keys")
-        except ValueError as e:
-            error_msg = str(e)
-            assert "primary_keys" in error_msg.lower(), f"Error should mention primary_keys: {error_msg}"
-            assert "property_id" in error_msg, f"Error should mention property_id: {error_msg}"
-            print(f"✅ Missing primary_keys raises helpful error")
-            print(f"  Error message: {error_msg[:100]}...")
+        metadata = connector.read_table_metadata("custom_without_pk", without_pk_options)
+        assert metadata["primary_keys"] == [], \
+            f"Should return empty primary_keys (framework will override), got: {metadata['primary_keys']}"
+        print(f"✅ Custom report without explicit primary_keys returns empty (framework will override)")
         
-        print(f"\n✅ PASSED: Custom reports correctly require explicit primary_keys")
+        print(f"\n✅ PASSED: Primary keys handling works correctly (old framework behavior)")
     except Exception as e:
         print(f"❌ FAILED: {str(e)}")
         raise

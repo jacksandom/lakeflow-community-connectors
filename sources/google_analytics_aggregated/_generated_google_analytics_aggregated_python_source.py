@@ -744,15 +744,8 @@ def register_lakeflow_source(spark):
             if not isinstance(dimensions, list):
                 raise ValueError("'dimensions' must be a JSON array of strings")
 
-            # Primary keys must be explicitly provided for custom reports
-            # Always prepend 'property_id' field for schema stability
-            primary_keys = table_options.get("primary_keys")
-            if not primary_keys:
-                raise ValueError(
-                    f"Custom report '{table_name}' requires 'primary_keys' in table_configuration. "
-                    f"Primary keys should be ['property_id'] + your dimensions. "
-                    f"Example: For dimensions=[\"date\", \"country\"], set primary_keys=[\"property_id\", \"date\", \"country\"]"
-                )
+            # Primary keys: Use from table_options if provided, otherwise return empty
+            primary_keys = table_options.get("primary_keys", [])
 
             # Determine cursor field and ingestion type
             # If 'date' dimension is present, use it as cursor for append ingestion
