@@ -8,7 +8,7 @@ The tests mock the Google Analytics API calls to avoid requiring real credential
 while still validating the full integration path:
     prebuilt_reports.json → LakeflowConnect → PySpark StructType
 
-Run with: pytest tests/google_analytics_aggregated/test_connector_integration.py -v
+Run with: pytest sources/google_analytics_aggregated/test/test_connector_integration.py -v
 """
 
 import json
@@ -38,13 +38,8 @@ sys.modules['google.auth.transport.requests'] = MagicMock()
 from sources.google_analytics_aggregated.google_analytics_aggregated import LakeflowConnect
 
 
-# Path to prebuilt reports
-PREBUILT_REPORTS_PATH = (
-    Path(__file__).parent.parent.parent
-    / "sources"
-    / "google_analytics_aggregated"
-    / "prebuilt_reports.json"
-)
+# Path to prebuilt reports (relative to this test file)
+PREBUILT_REPORTS_PATH = Path(__file__).parent.parent / "prebuilt_reports.json"
 
 
 # Fake metadata that mimics the GA4 API response structure
