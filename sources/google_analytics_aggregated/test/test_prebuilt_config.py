@@ -18,8 +18,11 @@ import pytest
 from pathlib import Path
 
 
-# Path to the prebuilt reports JSON file (relative to this test file)
-PREBUILT_REPORTS_PATH = Path(__file__).parent.parent / "prebuilt_reports.json"
+# Path to the prebuilt reports JSON file
+PREBUILT_REPORTS_PATH = (
+    Path(__file__).parent.parent
+    / "prebuilt_reports.json"
+)
 
 # GA4 API limits
 MAX_DIMENSIONS = 9
@@ -272,4 +275,3 @@ def test_prebuilt_reports_summary(prebuilt_reports):
     print("\n" + "=" * 60)
     print(f"Total: {len(prebuilt_reports)} prebuilt reports")
     print("=" * 60)
-

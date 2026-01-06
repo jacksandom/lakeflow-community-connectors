@@ -16,30 +16,14 @@ import pytest
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 
-# We need to mock the google.oauth2 import before importing LakeflowConnect
-# This allows tests to run without google-auth installed
-import sys
-
-# Create mock modules for google.oauth2
-mock_service_account = MagicMock()
-mock_credentials = MagicMock()
-mock_credentials.valid = True
-mock_credentials.token = "fake_token"
-mock_service_account.Credentials.from_service_account_info.return_value = mock_credentials
-
-sys.modules['google'] = MagicMock()
-sys.modules['google.oauth2'] = MagicMock()
-sys.modules['google.oauth2.service_account'] = mock_service_account
-sys.modules['google.auth'] = MagicMock()
-sys.modules['google.auth.transport'] = MagicMock()
-sys.modules['google.auth.transport.requests'] = MagicMock()
-
-# Now import the connector
 from sources.google_analytics_aggregated.google_analytics_aggregated import LakeflowConnect
 
 
-# Path to prebuilt reports (relative to this test file)
-PREBUILT_REPORTS_PATH = Path(__file__).parent.parent / "prebuilt_reports.json"
+# Path to prebuilt reports
+PREBUILT_REPORTS_PATH = (
+    Path(__file__).parent.parent
+    / "prebuilt_reports.json"
+)
 
 
 # Fake metadata that mimics the GA4 API response structure
@@ -108,8 +92,14 @@ def mock_connector():
         }),
     }
     
-    # Create connector with mocked internals
-    with patch.object(LakeflowConnect, '_fetch_metadata', return_value=FAKE_METADATA):
+    # Mock credentials object
+    mock_credentials = MagicMock()
+    mock_credentials.valid = True
+    mock_credentials.token = "fake_token"
+    
+    # Patch the credentials creation and metadata fetch
+    with patch('google.oauth2.service_account.Credentials.from_service_account_info', return_value=mock_credentials), \
+         patch.object(LakeflowConnect, '_fetch_metadata', return_value=FAKE_METADATA):
         connector = LakeflowConnect(fake_config)
         # Inject the fake metadata cache directly
         connector._metadata_cache = FAKE_METADATA
@@ -337,4 +327,3 @@ class TestAllPrebuiltReportsIntegration:
                 f"{report_name}: property_id should be in primary_keys"
             
             print(f"✅ {report_name}: {metadata['ingestion_type']}, keys={metadata['primary_keys']}")
-
