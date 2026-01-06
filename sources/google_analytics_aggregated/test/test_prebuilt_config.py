@@ -275,4 +275,3 @@ def test_prebuilt_reports_summary(prebuilt_reports):
     print("\n" + "=" * 60)
     print(f"Total: {len(prebuilt_reports)} prebuilt reports")
     print("=" * 60)
-
