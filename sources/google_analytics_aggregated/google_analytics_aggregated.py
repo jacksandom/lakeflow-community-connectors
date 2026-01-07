@@ -26,60 +26,6 @@ except ImportError:
     )
 
 
-def auto_fill_primary_keys(spec: dict) -> dict:
-    """
-    Auto-populate primary_keys from dimensions for GA4 custom reports.
-    
-    Call this on your pipeline_spec before passing to ingest() to avoid
-    manually specifying primary_keys for each custom report.
-    
-    Primary keys are set to ["property_id"] + dimensions for any custom report
-    that has 'dimensions' but not 'primary_keys' in its table_configuration.
-    
-    Prebuilt reports (those without explicit dimensions) are unaffected -
-    their primary keys are already inferred by the connector.
-    
-    Args:
-        spec: Pipeline specification dictionary
-        
-    Returns:
-        The same spec with primary_keys auto-filled
-        
-    Example:
-        from sources.google_analytics_aggregated.google_analytics_aggregated import auto_fill_primary_keys
-        
-        pipeline_spec = {
-            "connection_name": "my_ga4_connection",
-            "objects": [
-                {
-                    "table": {
-                        "source_table": "my_custom_report",
-                        "table_configuration": {
-                            "dimensions": '["date", "country"]',
-                            "metrics": '["activeUsers"]',
-                            # primary_keys will be auto-filled as ["property_id", "date", "country"]
-                        }
-                    }
-                }
-            ]
-        }
-        
-        ingest(spark, auto_fill_primary_keys(pipeline_spec))
-    """
-    for obj in spec.get("objects", []):
-        table_config = obj.get("table", {}).get("table_configuration")
-        if table_config:
-            dimensions_str = table_config.get("dimensions")
-            if dimensions_str and "primary_keys" not in table_config:
-                try:
-                    dimensions = json.loads(dimensions_str)
-                    if isinstance(dimensions, list):
-                        table_config["primary_keys"] = ["property_id"] + dimensions
-                except json.JSONDecodeError:
-                    pass  # Invalid JSON, let connector handle the error later
-    return spec
-
-
 class LakeflowConnect:
     # Class-level cache for prebuilt reports (loaded once)
     _prebuilt_reports_cache = None
@@ -655,8 +601,13 @@ class LakeflowConnect:
         if not isinstance(dimensions, list):
             raise ValueError("'dimensions' must be a JSON array of strings")
 
-        # Primary keys: Use from table_options if provided, otherwise return empty
-        primary_keys = table_options.get("primary_keys", [])
+        # Primary keys: Use from table_options if provided, otherwise infer from dimensions
+        # Always prepend 'property_id' for schema stability (allows adding properties later)
+        if "primary_keys" in table_options:
+            primary_keys = table_options.get("primary_keys")
+        else:
+            # Infer from dimensions: property_id + all dimensions
+            primary_keys = ["property_id"] + dimensions
 
         # Determine cursor field and ingestion type
         # If 'date' dimension is present, use it as cursor for append ingestion

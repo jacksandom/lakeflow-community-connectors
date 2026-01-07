@@ -508,7 +508,7 @@ Run the pipeline using your standard Lakeflow / Databricks orchestration (e.g., 
 No configuration needed! The connector automatically knows:
 - Dimensions: `["date", "country"]`
 - Metrics: `["activeUsers", "sessions", "screenPageViews"]`
-- Primary Keys: `["date", "country"]`
+- Primary Keys: `["property_id", "date", "country"]`
 
 **Example 2: Prebuilt report with overrides**
 ```json

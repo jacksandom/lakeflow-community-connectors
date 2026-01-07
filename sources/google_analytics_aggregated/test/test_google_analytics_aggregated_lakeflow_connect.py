@@ -434,8 +434,7 @@ def test_google_analytics_aggregated_connector():
             f"Should use explicit primary_keys in specified order, got: {metadata['primary_keys']}"
         print(f"✅ Custom report with explicit primary_keys works: {metadata['primary_keys']}")
         
-        # Test 2: Custom report WITHOUT primary_keys returns empty
-        # The framework's ingestion_pipeline.py line 137 will override with spec values
+        # Test 2: Custom report WITHOUT explicit primary_keys - infers from dimensions
         without_pk_options = {
             "dimensions": '["date", "country"]',
             "metrics": '["sessions"]',
@@ -443,11 +442,12 @@ def test_google_analytics_aggregated_connector():
         }
         
         metadata = connector.read_table_metadata("custom_without_pk", without_pk_options)
-        assert metadata["primary_keys"] == [], \
-            f"Should return empty primary_keys (framework will override), got: {metadata['primary_keys']}"
-        print(f"✅ Custom report without explicit primary_keys returns empty (framework will override)")
+        expected_inferred = ["property_id", "date", "country"]
+        assert metadata["primary_keys"] == expected_inferred, \
+            f"Should infer primary_keys from dimensions, got: {metadata['primary_keys']}"
+        print(f"✅ Custom report without explicit primary_keys infers: {metadata['primary_keys']}")
         
-        print(f"\n✅ PASSED: Primary keys handling works correctly (old framework behavior)")
+        print(f"\n✅ PASSED: Primary keys handling works correctly (auto-inference enabled)")
     except Exception as e:
         print(f"❌ FAILED: {str(e)}")
         raise

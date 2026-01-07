@@ -1,6 +1,5 @@
 from pipeline.ingestion_pipeline import ingest
 from libs.source_loader import get_register_function
-from sources.google_analytics_aggregated.google_analytics_aggregated import auto_fill_primary_keys
 
 source_name = "google_analytics_aggregated"
 
@@ -54,8 +53,8 @@ source_name = "google_analytics_aggregated"
 #             FOR CUSTOM REPORTS (Required):
 #             ├── dimensions (required): JSON array e.g., '["date", "country"]'
 #             ├── metrics (required): JSON array e.g., '["activeUsers", "sessions"]'
-#             ├── primary_keys (auto-filled): Use auto_fill_primary_keys() to infer from dimensions
-#             │                               Or manually set as ["property_id"] + dimensions
+#             ├── primary_keys (auto-inferred): Automatically set as ["property_id"] + dimensions
+#             │                                 Can be overridden if needed
 #             ├── start_date (optional): Initial date range start (default: "30daysAgo")
 #             ├── lookback_days (optional): Days to look back (default: 3)
 #             ├── page_size (optional): Records per request (default: 10000, max: 100000)
@@ -79,7 +78,7 @@ reports = [
     },
     
     # Example 2: Custom report with engagement metrics
-    # (primary_keys auto-filled as ["property_id", "date", "deviceCategory"])
+    # (primary_keys auto-inferred as ["property_id", "date", "deviceCategory"])
     {
         "table": {
             "source_table": "engagement_by_device",
@@ -94,7 +93,7 @@ reports = [
     },
     
     # Example 3: Custom report with filters
-    # (primary_keys auto-filled as ["property_id", "date", "platform", "browser"])
+    # (primary_keys auto-inferred as ["property_id", "date", "platform", "browser"])
     {
         "table": {
             "source_table": "web_traffic_sources",
@@ -109,7 +108,7 @@ reports = [
     },
     
     # Example 4: Custom snapshot report (no date dimension)
-    # (primary_keys auto-filled as ["property_id", "country"])
+    # (primary_keys auto-inferred as ["property_id", "country"])
     {
         "table": {
             "source_table": "all_time_by_country", 
@@ -177,5 +176,5 @@ pipeline_spec = {
 register_lakeflow_source = get_register_function(source_name)
 register_lakeflow_source(spark)
 
-# Auto-fill primary_keys from dimensions for custom reports, then ingest
-ingest(spark, auto_fill_primary_keys(pipeline_spec))
+# Ingest the tables specified in the pipeline spec
+ingest(spark, pipeline_spec)
