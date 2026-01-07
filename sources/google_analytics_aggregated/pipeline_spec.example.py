@@ -78,7 +78,6 @@ reports = [
     },
     
     # Example 2: Custom report with engagement metrics
-    # (primary_keys auto-inferred as ["property_id", "date", "deviceCategory"])
     {
         "table": {
             "source_table": "engagement_by_device",
@@ -93,7 +92,6 @@ reports = [
     },
     
     # Example 3: Custom report with filters
-    # (primary_keys auto-inferred as ["property_id", "date", "platform", "browser"])
     {
         "table": {
             "source_table": "web_traffic_sources",
@@ -108,7 +106,6 @@ reports = [
     },
     
     # Example 4: Custom snapshot report (no date dimension)
-    # (primary_keys auto-inferred as ["property_id", "country"])
     {
         "table": {
             "source_table": "all_time_by_country", 

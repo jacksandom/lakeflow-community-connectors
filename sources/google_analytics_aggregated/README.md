@@ -89,10 +89,10 @@ Provide the following **connection-level** options when configuring the connecto
 |----------------------------|--------|----------|---------------------------------------------------------------------------------------------------------------------------------|------------------------------------|
 | `property_ids`             | array  | yes      | List of Google Analytics 4 property IDs (numeric strings). For a single property, use a list with one element.                 | `["123456789"]` or `["123456789", "987654321"]` |
 | `credentials_json`         | object | yes      | Complete service account JSON key as a JSON object (paste the entire content of the downloaded JSON file). The service account must have access to all properties listed in `property_ids`. | `{"type": "service_account", ...}` |
-| `externalOptionsAllowList` | string | yes      | Comma-separated list of table-specific option names that are allowed to be passed through to the connector. This connector requires table-specific options, so this parameter must be set. | `dimensions,metrics,start_date,lookback_days,dimension_filter,metric_filter,page_size` |
+| `externalOptionsAllowList` | string | yes      | Comma-separated list of table-specific option names that are allowed to be passed through to the connector. This connector requires table-specific options, so this parameter must be set. | `dimensions,metrics,start_date,lookback_days,dimension_filter,metric_filter,page_size,tableConfigs` |
 
 The full list of supported table-specific options for `externalOptionsAllowList` is:
-`dimensions,metrics,start_date,lookback_days,dimension_filter,metric_filter,page_size`
+`dimensions,metrics,start_date,lookback_days,dimension_filter,metric_filter,page_size,tableConfigs`
 
 > **Note**: Table-specific options such as `dimensions`, `metrics`, or `start_date` are **not** connection parameters. They are provided per-table via table options in the pipeline specification. These option names must be included in `externalOptionsAllowList` for the connection to allow them.
 
@@ -193,7 +193,7 @@ A Unity Catalog connection for this connector can be created via the UI:
 
 1. Follow the **Lakeflow Community Connector** UI flow from the **Add Data** page.
 2. Select any existing Lakeflow Community Connector connection for this source or create a new one.
-3. Set `externalOptionsAllowList` to `dimensions,metrics,start_date,lookback_days,dimension_filter,metric_filter,page_size` (required for this connector to pass table-specific options).
+3. Set `externalOptionsAllowList` to `dimensions,metrics,start_date,lookback_days,dimension_filter,metric_filter,page_size,tableConfigs` (required for this connector to pass table-specific options).
 
 The connection can also be created using the standard Unity Catalog API.
 
