@@ -601,15 +601,13 @@ class LakeflowConnect:
         if not isinstance(dimensions, list):
             raise ValueError("'dimensions' must be a JSON array of strings")
 
-        # Primary keys: Use explicit primary_keys if provided, otherwise infer from dimensions
-        # Always prepend 'property_id' field for schema stability
-        explicit_primary_keys = table_options.get("primary_keys")
-        if explicit_primary_keys:
-            # User provided explicit primary_keys - use as-is
-            primary_keys = explicit_primary_keys
+        # Primary keys: Use from table_options if provided, otherwise infer from dimensions
+        # Always prepend 'property_id' for schema stability (allows adding properties later)
+        if "primary_keys" in table_options:
+            primary_keys = table_options.get("primary_keys")
         else:
             # Infer from dimensions: property_id + all dimensions
-            primary_keys = ["property_id"] + (dimensions if dimensions else [])
+            primary_keys = ["property_id"] + dimensions
 
         # Determine cursor field and ingestion type
         # If 'date' dimension is present, use it as cursor for append ingestion

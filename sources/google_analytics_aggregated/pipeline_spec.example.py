@@ -24,10 +24,10 @@ source_name = "google_analytics_aggregated"
 #
 # 2. CUSTOM REPORTS (For specific needs)
 #    - Use any source_table name you want
-#    - Manually specify dimensions and metrics
+#    - Manually specify dimensions, metrics, and primary_keys
 #    - Full control over report configuration
-#    - Required fields: dimensions, metrics
-#    - Primary keys are automatically inferred from dimensions
+#    - Required fields: dimensions, metrics, primary_keys
+#    - Primary keys must always start with "property_id" followed by dimensions
 #
 # =============================================================================
 #
@@ -53,8 +53,8 @@ source_name = "google_analytics_aggregated"
 #             FOR CUSTOM REPORTS (Required):
 #             ├── dimensions (required): JSON array e.g., '["date", "country"]'
 #             ├── metrics (required): JSON array e.g., '["activeUsers", "sessions"]'
-#             ├── primary_keys (optional): Defaults to ["property_id"] + dimensions
-#             │                            Can override if needed, e.g., ["property_id", "date"]
+#             ├── primary_keys (auto-inferred): Automatically set as ["property_id"] + dimensions
+#             │                                 Can be overridden if needed
 #             ├── start_date (optional): Initial date range start (default: "30daysAgo")
 #             ├── lookback_days (optional): Days to look back (default: 3)
 #             ├── page_size (optional): Records per request (default: 10000, max: 100000)

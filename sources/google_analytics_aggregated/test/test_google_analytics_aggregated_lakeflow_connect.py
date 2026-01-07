@@ -342,16 +342,16 @@ def test_google_analytics_aggregated_connector():
         print(f"❌ FAILED: {str(e)}")
         raise
 
-    # Test 15: Shadowing prebuilt report name with custom config (auto-inferred primary_keys)
+    # Test 15: Shadowing prebuilt report name with custom config
     print("\n" + "="*50)
     print("TEST: Shadowing prebuilt report name with custom config")
     print("="*50)
     
     # Use prebuilt name but provide custom dimensions (should override)
-    # Primary keys should be auto-inferred from dimensions
     shadow_options = {
         "dimensions": '["date", "city"]',  # Different from prebuilt!
-        "metrics": '["sessions"]'
+        "metrics": '["sessions"]',
+        "primary_keys": ["property_id", "date", "city"]  # Must explicitly define
     }
     
     try:
@@ -363,15 +363,15 @@ def test_google_analytics_aggregated_connector():
         print(f"✅ Custom dimensions override prebuilt report")
         print(f"  Fields: {', '.join(field_names)}")
         
-        # Metadata should auto-infer primary_keys from dimensions
+        # Metadata should use explicit primary_keys
         metadata = connector.read_table_metadata("traffic_by_country", shadow_options)
         expected_shadow_keys = ["property_id", "date", "city"]
         assert metadata["primary_keys"] == expected_shadow_keys, \
-            f"Should auto-infer primary_keys: {expected_shadow_keys}"
-        print(f"✅ Primary keys auto-inferred from dimensions")
+            f"Should use explicit primary_keys: {expected_shadow_keys}"
+        print(f"✅ Custom primary_keys used correctly")
         print(f"  Primary keys: {metadata['primary_keys']}")
         
-        print(f"\n✅ PASSED: Can shadow prebuilt report names with custom dimensions")
+        print(f"\n✅ PASSED: Can shadow prebuilt report names with explicit dimensions")
     except Exception as e:
         print(f"❌ FAILED: {str(e)}")
         raise
@@ -415,28 +415,39 @@ def test_google_analytics_aggregated_connector():
         print(f"❌ FAILED: {str(e)}")
         raise
 
-    # Test 16b: Explicit primary_keys (backward compatibility)
+    # Test 16b: Custom reports with/without explicit primary_keys
     print("\n" + "="*50)
-    print("TEST: Explicit primary_keys override auto-inference (backward compatibility)")
+    print("TEST: Custom reports with/without explicit primary_keys")
     print("="*50)
     
     try:
-        # Test with custom report that explicitly defines primary_keys
-        explicit_pk_options = {
+        # Test 1: Custom report WITH primary_keys should work
+        with_pk_options = {
             "dimensions": '["date", "country", "city"]',
             "metrics": '["sessions"]',
-            "primary_keys": ["property_id", "city", "date"],  # Non-standard order
+            "primary_keys": ["property_id", "city", "date"],  # Non-standard order to verify it's respected
             "start_date": "7daysAgo"
         }
         
-        metadata = connector.read_table_metadata("custom_explicit_pk", explicit_pk_options)
-        
-        # Should respect the explicit primary_keys order
+        metadata = connector.read_table_metadata("custom_with_pk", with_pk_options)
         assert metadata["primary_keys"] == ["property_id", "city", "date"], \
             f"Should use explicit primary_keys in specified order, got: {metadata['primary_keys']}"
-        print(f"✅ Explicit primary_keys respected: {metadata['primary_keys']}")
+        print(f"✅ Custom report with explicit primary_keys works: {metadata['primary_keys']}")
         
-        print(f"\n✅ PASSED: Explicit primary_keys still work (backward compatibility)")
+        # Test 2: Custom report WITHOUT explicit primary_keys - infers from dimensions
+        without_pk_options = {
+            "dimensions": '["date", "country"]',
+            "metrics": '["sessions"]',
+            "start_date": "7daysAgo"
+        }
+        
+        metadata = connector.read_table_metadata("custom_without_pk", without_pk_options)
+        expected_inferred = ["property_id", "date", "country"]
+        assert metadata["primary_keys"] == expected_inferred, \
+            f"Should infer primary_keys from dimensions, got: {metadata['primary_keys']}"
+        print(f"✅ Custom report without explicit primary_keys infers: {metadata['primary_keys']}")
+        
+        print(f"\n✅ PASSED: Primary keys handling works correctly (auto-inference enabled)")
     except Exception as e:
         print(f"❌ FAILED: {str(e)}")
         raise
