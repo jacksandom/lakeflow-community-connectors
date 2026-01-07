@@ -696,8 +696,9 @@ def register_lakeflow_source(spark):
             schema_fields.append(StructField("property_id", StringType(), False))
 
             # Add dimension fields
-            # Date-related dimensions use DateType, others use StringType
-            date_dimensions = ["date", "firstSessionDate", "dateHour", "dateHourMinute"]
+            # Only pure date dimensions (YYYYMMDD format) use DateType
+            # dateHour and dateHourMinute contain time components and must remain StringType
+            date_dimensions = ["date", "firstSessionDate"]
             for dim in dimensions:
                 if dim in date_dimensions:
                     schema_fields.append(StructField(dim, DateType(), True))

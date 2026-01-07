@@ -390,6 +390,7 @@ This is useful for discovering custom dimensions/metrics defined in your GA4 pro
 - **Type Inference**: The connector automatically determines proper data types by querying the Google Analytics metadata API:
   - **Property ID**: `StringType` - Always the first field in the schema
   - **Date Dimensions** (`date`, `firstSessionDate`): `DateType` - Automatically parsed from YYYYMMDD format
+  - **DateTime Dimensions** (`dateHour`, `dateHourMinute`): `StringType` - Kept as strings since they contain time components
   - **String Dimensions** (all others): `StringType`
   - **Integer Metrics** (`activeUsers`, `sessions`, etc.): `LongType` (64-bit integer)
   - **Float Metrics** (`engagementRate`, `bounceRate`, etc.): `DoubleType` (64-bit float)
@@ -404,6 +405,7 @@ The connector automatically infers proper data types using the Google Analytics 
 | **Property ID** (added by connector) | property_id | StringType | "123456789" | **Always included** as the first field for schema stability |
 | Dimension (any)  | country, city, deviceCategory   | StringType     | "United States", "desktop" | All non-date dimensions are strings |
 | Date dimension   | date, firstSessionDate          | DateType       | 2025-12-24 | Parsed from YYYYMMDD format (e.g., "20251224" → date(2025, 12, 24)) |
+| DateTime dimension | dateHour, dateHourMinute       | StringType     | "2024011514", "202401151430" | Kept as strings (contain time components that DateType cannot represent) |
 | TYPE_INTEGER     | activeUsers, sessions, newUsers | LongType       | 1234 | 64-bit integers, parsed from API string responses |
 | TYPE_FLOAT       | engagementRate, bounceRate      | DoubleType     | 56.78 | 64-bit floats, parsed from API string responses |
 | TYPE_CURRENCY    | totalRevenue                    | DoubleType     | 1234.56 | Currency values as floats |

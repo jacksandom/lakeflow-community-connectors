@@ -800,7 +800,9 @@ Google Analytics Data API returns all values as strings in the response, but pro
 | Google Analytics Type | API Type Enum | Connector Logical Type | Parsing Logic | Example Raw Value | Example Parsed Value |
 |----------------------|---------------|------------------------|---------------|-------------------|---------------------|
 | Dimension (any) | N/A | string | No parsing needed | "United States" | "United States" |
-| Date dimension | N/A | string or date | Parse YYYYMMDD → date | "20240115" | "2024-01-15" |
+| Date dimension (`date`, `firstSessionDate`) | N/A | date | Parse YYYYMMDD → date | "20240115" | "2024-01-15" |
+| DateTime dimension (`dateHour`) | N/A | string | Keep as string (contains time component) | "2024011514" | "2024011514" |
+| DateTime dimension (`dateHourMinute`) | N/A | string | Keep as string (contains time component) | "202401151430" | "202401151430" |
 | Integer metric | TYPE_INTEGER | long (64-bit integer) | Parse string → integer | "1234" | 1234 |
 | Float metric | TYPE_FLOAT | double (64-bit float) | Parse string → float | "56.78" | 56.78 |
 | Currency metric | TYPE_CURRENCY | double | Parse string → float | "1234.56" | 1234.56 |
@@ -844,34 +846,47 @@ def parse_metric_value(value_str: str, metric_type: str):
 
 def parse_dimension_value(value_str: str, dimension_name: str):
     """
-    Parse dimension value. Most dimensions remain as strings,
-    but date dimensions can be converted to date objects.
+    Parse dimension value. Most dimensions remain as strings.
+    Only pure date dimensions (date, firstSessionDate) are converted to date format.
+    
+    Note: dateHour and dateHourMinute contain time components and should remain
+    as strings since DateType cannot represent time. They use formats:
+      - dateHour: YYYYMMDDHH (10 chars)
+      - dateHourMinute: YYYYMMDDHHmm (12 chars)
     
     Args:
         value_str: String value from API response
         dimension_name: Name of the dimension
         
     Returns:
-        Parsed value (string or date)
+        Parsed value (string or date string)
     """
-    if dimension_name in ["date", "firstSessionDate", "dateHour"]:
-        # Parse date dimensions: YYYYMMDD format
-        if len(value_str) == 8:
-            return f"{value_str[0:4]}-{value_str[4:6]}-{value_str[6:8]}"
-        # dateHour format: YYYYMMDDHH
-        elif len(value_str) == 10:
-            return f"{value_str[0:4]}-{value_str[4:6]}-{value_str[6:8]} {value_str[8:10]}:00:00"
+    # Only parse pure date dimensions (YYYYMMDD format) to date strings
+    if dimension_name in ["date", "firstSessionDate"] and len(value_str) == 8:
+        return f"{value_str[0:4]}-{value_str[4:6]}-{value_str[6:8]}"
+    
+    # dateHour and dateHourMinute remain as strings (contain time components)
+    # Do NOT parse these as DateType - they would lose time information
     
     return value_str
 ```
 
 ### **Special Field Behaviors**
 
-**Date Dimensions:**
-- Format: YYYYMMDD (e.g., "20240115" for January 15, 2024)
-- Can be stored as string or parsed to date type
-- Recommended: Store as date type for easier querying
-- `dateHour` dimension uses YYYYMMDDHH format
+**Date and DateTime Dimensions:**
+
+There are four date/time-related dimensions with different formats:
+
+| Dimension | Format | Length | Example | Recommended Type |
+|-----------|--------|--------|---------|------------------|
+| `date` | YYYYMMDD | 8 chars | "20240115" | DateType |
+| `firstSessionDate` | YYYYMMDD | 8 chars | "20240110" | DateType |
+| `dateHour` | YYYYMMDDHH | 10 chars | "2024011514" | StringType |
+| `dateHourMinute` | YYYYMMDDHHmm | 12 chars | "202401151430" | StringType |
+
+**Important**: 
+- Only `date` and `firstSessionDate` should be stored as DateType (pure date, no time component)
+- `dateHour` and `dateHourMinute` contain time components and **must remain as StringType** since DateType cannot represent time. Storing these as DateType will cause runtime errors when parsing
 
 **Null/Missing Values:**
 - Dimension values: Should not be null in normal operation, but may be "(not set)" for missing data
@@ -1079,9 +1094,10 @@ Since the API doesn't provide primary keys:
 Use the `getMetadata` API to infer proper data types:
 
 - **Date Dimensions** (`date`, `firstSessionDate`): Parse YYYYMMDD format to DateType
+- **DateTime Dimensions** (`dateHour`, `dateHourMinute`): Keep as StringType (contain time components that DateType cannot represent)
 - **Integer Metrics** (TYPE_INTEGER): LongType (64-bit)
 - **Float Metrics** (TYPE_FLOAT, TYPE_CURRENCY, etc.): DoubleType
-- **All Dimensions** (except dates): StringType
+- **All Other Dimensions**: StringType
 
 
 ## **Research Log**
@@ -1099,6 +1115,7 @@ Use the `getMetadata` API to infer proper data types:
 | Official Docs | https://developers.google.com/analytics/devguides/reporting/data/v1/rest/v1beta/properties/getMetadata | 2024-12-23 | High | How to retrieve available dimensions and metrics for a property, including metric type information (TYPE_INTEGER, TYPE_FLOAT, etc.) |
 | Official Docs | https://developers.google.com/analytics/devguides/reporting/data/v1/rest/v1alpha/DateRange | 2024-12-30 | High | Documents 4 date ranges limit per request (v1alpha, confirmed in v1beta via empirical testing) |
 | Third-Party Docs | https://docs.aws.amazon.com/glue/latest/dg/googleanalytics-connector-limitations.html | 2024-12-30 | Medium | Documents 9 dimensions and 10 metrics limits per request for GA4 API (enforced by Google Analytics API but not explicitly documented by Google) |
+| Official Docs | https://developers.google.com/analytics/devguides/reporting/data/v1/api-schema | 2026-01-07 | High | Confirmed all date/time dimensions: date (YYYYMMDD), firstSessionDate (YYYYMMDD), dateHour (YYYYMMDDHH), dateHourMinute (YYYYMMDDHHmm) and their formats |
 
 
 ## **Sources and References**

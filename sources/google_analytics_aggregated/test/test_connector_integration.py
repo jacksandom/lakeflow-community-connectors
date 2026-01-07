@@ -41,6 +41,9 @@ FAKE_METADATA = {
     },
     "available_dimensions": {
         "date",
+        "dateHour",
+        "dateHourMinute",
+        "firstSessionDate",
         "country",
         "city",
         "sessionSource",
@@ -290,6 +293,35 @@ class TestSchemaDataTypes:
         
         # property_id should be StringType
         assert isinstance(field_dict["property_id"], StringType), "property_id should be StringType"
+    
+    def test_date_dimension_types(self, mock_connector):
+        """Verify date-related dimensions have correct types.
+        
+        Critical test: dateHour and dateHourMinute must be StringType (not DateType)
+        because they contain time components that DateType cannot represent.
+        """
+        from pyspark.sql.types import StringType, DateType
+        
+        # Test with all date-related dimensions
+        table_options = {
+            "dimensions": '["date", "firstSessionDate", "dateHour", "dateHourMinute"]',
+            "metrics": '["activeUsers"]'
+        }
+        
+        schema = mock_connector.get_table_schema("test_date_types", table_options)
+        field_dict = {f.name: f.dataType for f in schema.fields}
+        
+        # Pure date dimensions (YYYYMMDD format) should be DateType
+        assert isinstance(field_dict["date"], DateType), \
+            "date should be DateType (YYYYMMDD format)"
+        assert isinstance(field_dict["firstSessionDate"], DateType), \
+            "firstSessionDate should be DateType (YYYYMMDD format)"
+        
+        # DateTime dimensions (contain time components) MUST be StringType
+        assert isinstance(field_dict["dateHour"], StringType), \
+            "dateHour should be StringType (YYYYMMDDHH format contains time)"
+        assert isinstance(field_dict["dateHourMinute"], StringType), \
+            "dateHourMinute should be StringType (YYYYMMDDHHmm format contains time)"
 
 
 class TestAllPrebuiltReportsIntegration:
