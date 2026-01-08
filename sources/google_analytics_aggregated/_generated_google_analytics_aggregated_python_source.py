@@ -760,7 +760,10 @@ def register_lakeflow_source(spark):
                 cursor_field = None
                 if "date" in dimensions:
                     cursor_field = "date"
-                    ingestion_type = "append"
+                    # Use "cdc" instead of "append" to enable MERGE behavior
+                    # This allows lookback_days to re-fetch and update settled data
+                    # without being blocked by streaming checkpoints
+                    ingestion_type = "cdc"
                 else:
                     ingestion_type = "snapshot"
 
@@ -809,7 +812,10 @@ def register_lakeflow_source(spark):
             cursor_field = None
             if "date" in dimensions:
                 cursor_field = "date"
-                ingestion_type = "append"
+                # Use "cdc" instead of "append" to enable MERGE behavior
+                # This allows lookback_days to re-fetch and update settled data
+                # without being blocked by streaming checkpoints
+                ingestion_type = "cdc"
             else:
                 # Without date dimension, treat as snapshot
                 ingestion_type = "snapshot"

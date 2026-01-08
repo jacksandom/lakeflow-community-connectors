@@ -236,7 +236,7 @@ No `table_configuration` needed. The connector automatically knows:
 - Dimensions: `["date", "country"]`
 - Metrics: `["activeUsers", "sessions", "screenPageViews"]`
 - Primary Keys: `["property_id", "date", "country"]` (property_id always included)
-- Ingestion Type: `append` (with `date` as cursor)
+- Ingestion Type: `cdc` (with `date` as cursor, enables settlement-aware sync)
 
 **Example with optional overrides:**
 ```json
@@ -286,10 +286,10 @@ The connector defines the ingestion mode and primary key dynamically based on th
 
 | Configuration   | Description                                           | Ingestion Type | Primary Key                                           | Incremental Cursor (if any) |
 |-----------------|-------------------------------------------------------|----------------|-------------------------------------------------------|------------------------------|
-| Any report name | User-defined aggregated data report with custom dimensions/metrics | `append` or `snapshot` | Composite of all dimensions                           | `date` dimension (if present) |
+| Any report name | User-defined aggregated data report with custom dimensions/metrics | `cdc` or `snapshot` | Composite of all dimensions                           | `date` dimension (if present) |
 
 **Ingestion Type Logic**:
-- **`append`**: Used when the `date` dimension is included. The connector tracks the maximum date and incrementally fetches new data with a lookback window.
+- **`cdc`**: Used when the `date` dimension is included. This enables MERGE behavior (via `apply_changes`) so the lookback window can re-fetch and update settled data. GA4 data typically settles within 48-72 hours as attribution models finalize.
 - **`snapshot`**: Used when no `date` dimension is present. The entire report is refreshed on each sync.
 
 **Primary Key Logic**:
@@ -678,7 +678,7 @@ The connector uses the following Google Analytics Data API endpoints:
 - **Data fetching**: Varies by report size (10,000 rows/page, automatic pagination)
 - **Automatic Inference**: Zero additional API calls or configuration overhead
   - Primary keys automatically inferred from dimensions
-  - Ingestion type automatically determined (append vs snapshot)
+  - Ingestion type automatically determined (cdc vs snapshot)
   - No redundant configuration needed
 - **Validation**: Zero additional API calls (uses cached metadata)
   - Validates dimension/metric existence (catches typos)

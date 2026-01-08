@@ -216,7 +216,7 @@ class TestPrebuiltReportMetadata:
         """Verify traffic_by_country metadata is correct."""
         metadata = mock_connector.read_table_metadata("traffic_by_country", {})
         
-        assert metadata["ingestion_type"] == "append", "Should be append (has date)"
+        assert metadata["ingestion_type"] == "cdc", "Should be cdc (has date) for settlement-aware sync"
         assert metadata["cursor_field"] == "date", "Cursor should be date"
         assert metadata["primary_keys"] == ["property_id", "date", "country"]
     
@@ -224,7 +224,7 @@ class TestPrebuiltReportMetadata:
         """Verify user_acquisition metadata is correct."""
         metadata = mock_connector.read_table_metadata("user_acquisition", {})
         
-        assert metadata["ingestion_type"] == "append", "Should be append (has date)"
+        assert metadata["ingestion_type"] == "cdc", "Should be cdc (has date) for settlement-aware sync"
         assert metadata["cursor_field"] == "date", "Cursor should be date"
         assert metadata["primary_keys"] == ["property_id", "date", "sessionSource", "sessionMedium"]
     
@@ -232,21 +232,21 @@ class TestPrebuiltReportMetadata:
         """Verify events_summary metadata is correct."""
         metadata = mock_connector.read_table_metadata("events_summary", {})
         
-        assert metadata["ingestion_type"] == "append"
+        assert metadata["ingestion_type"] == "cdc"
         assert metadata["primary_keys"] == ["property_id", "date", "eventName"]
     
     def test_page_performance_metadata(self, mock_connector):
         """Verify page_performance metadata is correct."""
         metadata = mock_connector.read_table_metadata("page_performance", {})
         
-        assert metadata["ingestion_type"] == "append"
+        assert metadata["ingestion_type"] == "cdc"
         assert metadata["primary_keys"] == ["property_id", "date", "pagePath", "pageTitle"]
     
     def test_device_breakdown_metadata(self, mock_connector):
         """Verify device_breakdown metadata is correct."""
         metadata = mock_connector.read_table_metadata("device_breakdown", {})
         
-        assert metadata["ingestion_type"] == "append"
+        assert metadata["ingestion_type"] == "cdc"
         assert metadata["primary_keys"] == ["property_id", "date", "deviceCategory", "browser"]
 
 
