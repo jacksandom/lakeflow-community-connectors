@@ -242,10 +242,10 @@ class TestSchemaGeneration:
 class TestMetadataGeneration:
     """Test metadata generation (ingestion type, primary keys, etc.)."""
 
-    def test_report_with_date_uses_append_ingestion(self, connector):
-        """Reports with date dimension should use append ingestion with cursor."""
+    def test_report_with_date_uses_cdc_ingestion(self, connector):
+        """Reports with date dimension should use CDC ingestion for settlement-aware sync."""
         metadata = connector.read_table_metadata("traffic_by_country", {})
-        assert metadata["ingestion_type"] == "append"
+        assert metadata["ingestion_type"] == "cdc"
         assert metadata.get("cursor_field") == "date"
 
     def test_report_without_date_uses_snapshot_ingestion(self, connector):
