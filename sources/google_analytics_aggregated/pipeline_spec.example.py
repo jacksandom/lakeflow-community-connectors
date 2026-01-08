@@ -41,7 +41,7 @@ source_name = "google_analytics_aggregated"
 #         ├── destination_schema (optional): Target schema
 #         ├── destination_table (optional): Target table name (defaults to source_table)
 #         └── table_configuration (optional for prebuilt, required for custom): Report settings
-#             
+#
 #             FOR PREBUILT REPORTS (Optional - only to override defaults):
 #             ├── start_date (optional): Override default "30daysAgo"
 #             ├── lookback_days (optional): Override default 3
@@ -49,7 +49,7 @@ source_name = "google_analytics_aggregated"
 #             ├── metric_filter (optional): Add filters
 #             ├── page_size (optional): Override default 10000
 #             ├── scd_type (optional): Override default "SCD_TYPE_1"
-#             
+#
 #             FOR CUSTOM REPORTS (Required):
 #             ├── dimensions (required): JSON array e.g., '["date", "country"]'
 #             ├── metrics (required): JSON array e.g., '["activeUsers", "sessions"]'
@@ -76,7 +76,7 @@ reports = [
             # }
         }
     },
-    
+
     # Example 2: Custom report with engagement metrics
     {
         "table": {
@@ -90,7 +90,7 @@ reports = [
             },
         }
     },
-    
+
     # Example 3: Custom report with filters
     {
         "table": {
@@ -100,15 +100,17 @@ reports = [
                 "metrics": '["sessions"]',
                 "start_date": "7daysAgo",
                 "lookback_days": "3",
-                "dimension_filter": '{"filter": {"fieldName": "platform", "stringFilter": {"matchType": "EXACT", "value": "web"}}}',
+                # Filter to only include web traffic
+                "dimension_filter": '{"filter": {"fieldName": "platform", '
+                                    '"stringFilter": {"matchType": "EXACT", "value": "web"}}}',
             },
         }
     },
-    
+
     # Example 4: Custom snapshot report (no date dimension)
     {
         "table": {
-            "source_table": "all_time_by_country", 
+            "source_table": "all_time_by_country",
             "table_configuration": {
                 "dimensions": '["country"]',
                 "metrics": '["totalUsers", "sessions"]',
@@ -153,7 +155,8 @@ pipeline_spec = {
 # - eventName: Event dimensions
 #
 # For full list, see: https://developers.google.com/analytics/devguides/reporting/data/v1/api-schema
-# Or use the Metadata API: GET https://analyticsdata.googleapis.com/v1beta/properties/{propertyId}/metadata
+# Or use the Metadata API:
+#   GET https://analyticsdata.googleapis.com/v1beta/properties/{propertyId}/metadata
 # =============================================================================
 
 # =============================================================================
@@ -165,8 +168,9 @@ pipeline_spec = {
 # - conversions, eventCount: Event and conversion metrics
 # - bounceRate, sessionConversionRate: Conversion rates
 #
-# For full list, see: https://developers.google.com/analytics/devguides/reporting/data/v1/api-schema
-# Or use the Metadata API: GET https://analyticsdata.googleapis.com/v1beta/properties/{propertyId}/metadata
+# For full list, see the GA4 API schema documentation.
+# Or use the Metadata API:
+#   GET https://analyticsdata.googleapis.com/v1beta/properties/{propertyId}/metadata
 # =============================================================================
 
 # Dynamically import and register the LakeFlow source
