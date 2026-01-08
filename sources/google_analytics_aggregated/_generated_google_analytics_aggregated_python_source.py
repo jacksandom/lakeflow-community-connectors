@@ -230,7 +230,7 @@ def register_lakeflow_source(spark):
 
             Expected options:
                 - property_ids: List of Google Analytics 4 property IDs (JSON array of numeric strings)
-                  Examples: 
+                  Examples:
                     - Single property: '["123456789"]'
                     - Multiple properties: '["123456789", "987654321"]'
                 - credentials_json: Service account JSON credentials as a JSON object or string.
@@ -473,7 +473,8 @@ def register_lakeflow_source(spark):
             """
             Validate that requested dimensions and metrics exist in the property metadata
             and that they don't exceed API limits.
-            This catches typos, non-existent fields, and limit violations without making extra API calls.
+            This catches typos, non-existent fields, and limit violations without
+            making extra API calls.
 
             API Limits validated:
             - Maximum 9 dimensions per request
@@ -489,7 +490,8 @@ def register_lakeflow_source(spark):
                 metrics: List of metric names to validate
 
             Raises:
-                ValueError: If any dimensions or metrics are not found in metadata, or if limits are exceeded
+                ValueError: If any dimensions or metrics are not found in metadata,
+                    or if limits are exceeded
             """
             metadata = self._fetch_metadata()
             available_dimensions = metadata.get("available_dimensions", set())
@@ -510,36 +512,50 @@ def register_lakeflow_source(spark):
             unknown_metrics = [m for m in metrics if m not in available_metrics]
 
             # Build comprehensive error message if any validation fails
-            if unknown_dimensions or unknown_metrics or dimension_count > MAX_DIMENSIONS or metric_count > MAX_METRICS:
+            has_errors = (unknown_dimensions or unknown_metrics or
+                          dimension_count > MAX_DIMENSIONS or metric_count > MAX_METRICS)
+            if has_errors:
                 error_parts = ["Invalid report configuration:"]
 
                 # Report limit violations first (most critical)
                 if dimension_count > MAX_DIMENSIONS:
-                    error_parts.append(f"\n  Too many dimensions: {dimension_count} (maximum {MAX_DIMENSIONS})")
-                    error_parts.append(f"    The Google Analytics Data API limits requests to {MAX_DIMENSIONS} dimensions.")
+                    error_parts.append(
+                        f"\n  Too many dimensions: {dimension_count} (max {MAX_DIMENSIONS})")
+                    error_parts.append(
+                        f"    The GA4 API limits requests to {MAX_DIMENSIONS} dimensions.")
                     error_parts.append(f"    Your request has: {dimensions}")
 
                 if metric_count > MAX_METRICS:
-                    error_parts.append(f"\n  Too many metrics: {metric_count} (maximum {MAX_METRICS})")
-                    error_parts.append(f"    The Google Analytics Data API limits requests to {MAX_METRICS} metrics.")
+                    error_parts.append(
+                        f"\n  Too many metrics: {metric_count} (max {MAX_METRICS})")
+                    error_parts.append(
+                        f"    The GA4 API limits requests to {MAX_METRICS} metrics.")
                     error_parts.append(f"    Your request has: {metrics}")
 
                 # Report unknown fields
                 if unknown_dimensions:
                     error_parts.append(f"\n  Unknown dimensions: {unknown_dimensions}")
-                    error_parts.append(f"    Available dimensions include: {sorted(list(available_dimensions))[:10]}...")
+                    sample_dims = sorted(list(available_dimensions))[:10]
+                    error_parts.append(f"    Available dimensions include: {sample_dims}...")
 
                 if unknown_metrics:
                     error_parts.append(f"\n  Unknown metrics: {unknown_metrics}")
-                    error_parts.append(f"    Available metrics include: {sorted(list(available_metrics))[:10]}...")
+                    sample_metrics = sorted(list(available_metrics))[:10]
+                    error_parts.append(f"    Available metrics include: {sample_metrics}...")
 
-                error_parts.append("\n\nTo see all available dimensions and metrics for your property:")
-                error_parts.append(f"\n  GET https://analyticsdata.googleapis.com/v1beta/properties/{self.property_ids[0]}/metadata")
+                error_parts.append(
+                    "\n\nTo see all available dimensions and metrics for your property:")
+                prop_id = self.property_ids[0]
+                error_parts.append(
+                    f"\n  GET https://analyticsdata.googleapis.com/v1beta/"
+                    f"properties/{prop_id}/metadata")
 
                 if dimension_count > MAX_DIMENSIONS or metric_count > MAX_METRICS:
                     error_parts.append("\n\nTo work around dimension/metric limits:")
-                    error_parts.append("\n  - Split your report into multiple smaller reports")
-                    error_parts.append("\n  - Prioritize the most important dimensions and metrics for your analysis")
+                    error_parts.append(
+                        "\n  - Split your report into multiple smaller reports")
+                    error_parts.append(
+                        "\n  - Prioritize the most important dimensions and metrics")
 
                 raise ValueError("".join(error_parts))
 
@@ -567,7 +583,7 @@ def register_lakeflow_source(spark):
             }
 
             for attempt in range(retry_count):
-                response = requests.post(url, headers=headers, json=body)
+                response = requests.post(url, headers=headers, json=body, timeout=120)
 
                 if response.status_code == 200:
                     return response.json()
@@ -582,10 +598,10 @@ def register_lakeflow_source(spark):
                     if attempt < retry_count - 1:
                         time.sleep(wait_time)
                         continue
-                    else:
-                        raise Exception(
-                            f"Rate limit exceeded after {retry_count} retries: {response.text}"
-                        )
+                    raise Exception(
+                        f"Rate limit exceeded after {retry_count} retries: "
+                        f"{response.text}"
+                    )
 
                 elif response.status_code == 401:
                     # Token might be expired, try refreshing once
@@ -596,14 +612,15 @@ def register_lakeflow_source(spark):
                         access_token = self._credentials.token
                         headers["Authorization"] = f"Bearer {access_token}"
                         continue
-                    else:
-                        raise Exception(
-                            f"Authentication failed: {response.status_code} - {response.text}"
-                        )
+                    raise Exception(
+                        f"Authentication failed: {response.status_code} - "
+                        f"{response.text}"
+                    )
 
                 elif response.status_code == 403:
                     raise Exception(
-                        f"Permission denied. Ensure service account has access to property {property_id}: {response.text}"
+                        f"Permission denied. Ensure service account has access to "
+                        f"property {property_id}: {response.text}"
                     )
 
                 else:
@@ -638,20 +655,24 @@ def register_lakeflow_source(spark):
             1. Prebuilt reports: table_name matches a prebuilt report name (no table_options needed)
             2. Custom reports: configured via table_options (dimensions, metrics, or prebuilt_report)
 
-            If table_name matches a prebuilt report BUT explicit dimensions are provided in 
+            If table_name matches a prebuilt report BUT explicit dimensions are provided in
             table_options, the custom dimensions take precedence (shadowing the prebuilt report).
             """
             # Check if this is a prebuilt report (identified by table name)
             prebuilt_reports = self._load_prebuilt_reports()
 
-            # Check for explicit override: if dimensions are provided, use custom config even if name matches prebuilt
-            if table_name in prebuilt_reports and "dimensions" not in table_options:
+            # Check for explicit override: if dimensions are provided,
+            # use custom config even if name matches prebuilt
+            is_prebuilt = table_name in prebuilt_reports
+            has_custom_dims = "dimensions" in table_options
+            if is_prebuilt and not has_custom_dims:
                 # Load configuration from prebuilt report (no override)
                 table_options = prebuilt_reports[table_name].copy()
-            elif table_name in prebuilt_reports and "dimensions" in table_options:
-                # User is shadowing a prebuilt report name with custom config - log warning
-                print(f"⚠️  WARNING: Using custom configuration for '{table_name}' (shadowing prebuilt report)")
-                print(f"    To avoid confusion, consider using a different source_table name.")
+            elif is_prebuilt and has_custom_dims:
+                # User is shadowing a prebuilt report name with custom config
+                print(f"⚠️  WARNING: Custom config for '{table_name}' "
+                      f"(shadowing prebuilt report)")
+                print("    Consider using a different source_table name.")
                 # Use custom config
                 table_options = self._resolve_table_options(table_options)
             else:
@@ -692,7 +713,8 @@ def register_lakeflow_source(spark):
             # Build schema fields
             schema_fields = []
 
-            # Always add property_id field for schema stability (allows adding properties later without schema changes)
+            # Always add property_id field for schema stability
+            # (allows adding properties later without schema changes)
             schema_fields.append(StructField("property_id", StringType(), False))
 
             # Add dimension fields
@@ -728,14 +750,17 @@ def register_lakeflow_source(spark):
             1. Prebuilt reports: table_name matches a prebuilt report name (e.g., "traffic_by_country")
             2. Custom reports: table_name is user-defined, configured via table_options
 
-            If table_name matches a prebuilt report BUT explicit dimensions are provided in 
+            If table_name matches a prebuilt report BUT explicit dimensions are provided in
             table_options, the custom dimensions take precedence (shadowing the prebuilt report).
             """
             # Check if this is a prebuilt report (identified by table name)
             prebuilt_reports = self._load_prebuilt_reports()
 
-            # Check for explicit override: if dimensions are provided, use custom config even if name matches prebuilt
-            if table_name in prebuilt_reports and "dimensions" not in table_options:
+            # Check for explicit override: if dimensions are provided,
+            # use custom config even if name matches prebuilt
+            is_prebuilt = table_name in prebuilt_reports
+            has_custom_dims = "dimensions" in table_options
+            if is_prebuilt and not has_custom_dims:
                 # Load configuration from prebuilt report (no override)
                 report_config = prebuilt_reports[table_name]
 
@@ -746,7 +771,8 @@ def register_lakeflow_source(spark):
                 except json.JSONDecodeError:
                     dimensions = []
 
-                # Primary keys: Use explicit primary_keys if defined in prebuilt config, otherwise infer from dimensions
+                # Primary keys: Use explicit primary_keys if defined in prebuilt
+                # config, otherwise infer from dimensions.
                 # Always prepend 'property_id' field for schema stability
                 explicit_primary_keys = report_config.get("primary_keys")
                 if explicit_primary_keys:
@@ -777,10 +803,11 @@ def register_lakeflow_source(spark):
 
                 return metadata
 
-            elif table_name in prebuilt_reports and "dimensions" in table_options:
-                # User is shadowing a prebuilt report name with custom config - log warning
-                print(f"⚠️  WARNING: Using custom configuration for '{table_name}' (shadowing prebuilt report)")
-                print(f"    To avoid confusion, consider using a different source_table name.")
+            elif is_prebuilt and has_custom_dims:
+                # User is shadowing a prebuilt report name with custom config
+                print(f"⚠️  WARNING: Custom config for '{table_name}' "
+                      f"(shadowing prebuilt report)")
+                print("    Consider using a different source_table name.")
                 # Fall through to custom report logic below
 
             # Not a prebuilt report (or explicitly overridden) - treat as custom report
@@ -877,26 +904,29 @@ def register_lakeflow_source(spark):
             1. Prebuilt reports: table_name matches a prebuilt report name (no table_options needed)
             2. Custom reports: configured via table_options
 
-            If table_name matches a prebuilt report BUT explicit dimensions are provided in 
+            If table_name matches a prebuilt report BUT explicit dimensions are provided in
             table_options, the custom dimensions take precedence (shadowing the prebuilt report).
 
             Table options (for custom reports):
-                - prebuilt_report (optional): Name of a prebuilt report (e.g., "traffic_by_country")
+                - prebuilt_report: Name of a prebuilt report (e.g., "traffic_by_country")
                 OR
                 - dimensions (required): JSON array of dimension names
                 - metrics (required): JSON array of metric names
                 Plus optional:
-                - start_date (optional): Start date for first sync (YYYY-MM-DD or relative like "30daysAgo")
-                - lookback_days (optional): Number of days to look back for incremental syncs (default: 3)
-                - dimension_filter (optional): Filter expression for dimensions (JSON object)
-                - metric_filter (optional): Filter expression for metrics (JSON object)
-                - page_size (optional): Number of rows per page (default: 10000, max: 100000)
+                - start_date: Start date for first sync (YYYY-MM-DD or "30daysAgo")
+                - lookback_days: Days to look back for incremental syncs (default: 3)
+                - dimension_filter: Filter expression for dimensions (JSON object)
+                - metric_filter: Filter expression for metrics (JSON object)
+                - page_size: Rows per page (default: 10000, max: 100000)
             """
             # Check if this is a prebuilt report (identified by table name)
             prebuilt_reports = self._load_prebuilt_reports()
 
-            # Check for explicit override: if dimensions are provided, use custom config even if name matches prebuilt
-            if table_name in prebuilt_reports and "dimensions" not in table_options:
+            # Check for explicit override: if dimensions are provided,
+            # use custom config even if name matches prebuilt
+            is_prebuilt = table_name in prebuilt_reports
+            has_custom_dims = "dimensions" in table_options
+            if is_prebuilt and not has_custom_dims:
                 # Load configuration from prebuilt report (no override)
                 # User can still override settings like start_date via table_options
                 base_config = prebuilt_reports[table_name].copy()
@@ -904,10 +934,11 @@ def register_lakeflow_source(spark):
                 for key, value in table_options.items():
                     base_config[key] = value
                 table_options = base_config
-            elif table_name in prebuilt_reports and "dimensions" in table_options:
-                # User is shadowing a prebuilt report name with custom config - log warning
-                print(f"⚠️  WARNING: Using custom configuration for '{table_name}' (shadowing prebuilt report)")
-                print(f"    To avoid confusion, consider using a different source_table name.")
+            elif is_prebuilt and has_custom_dims:
+                # User is shadowing a prebuilt report name with custom config
+                print(f"⚠️  WARNING: Custom config for '{table_name}' "
+                      f"(shadowing prebuilt report)")
+                print("    Consider using a different source_table name.")
                 # Use custom config
                 table_options = self._resolve_table_options(table_options)
             else:
@@ -1037,9 +1068,12 @@ def register_lakeflow_source(spark):
                                 dimension_values[i]["value"] if i < len(dimension_values) else None
                             )
 
-                            # Parse date dimensions from YYYYMMDD to YYYY-MM-DD string format
-                            # PySpark will convert the string to DateType based on the schema
-                            if dim_name in ["date", "firstSessionDate"] and dim_value and len(dim_value) == 8:
+                            # Parse date dimensions from YYYYMMDD to YYYY-MM-DD string
+                            # PySpark will convert the string to DateType based on schema
+                            date_dims = ["date", "firstSessionDate"]
+                            is_date_dim = (dim_name in date_dims and dim_value and
+                                           len(dim_value) == 8)
+                            if is_date_dim:
                                 try:
                                     # Convert YYYYMMDD to YYYY-MM-DD string
                                     year = int(dim_value[0:4])
@@ -1101,6 +1135,7 @@ def register_lakeflow_source(spark):
     TABLE_NAME = "tableName"
     TABLE_NAME_LIST = "tableNameList"
     TABLE_CONFIGS = "tableConfigs"
+    IS_DELETE_FLOW = "isDeleteFlow"
 
 
     class LakeflowStreamReader(SimpleDataSourceStreamReader):
@@ -1125,9 +1160,20 @@ def register_lakeflow_source(spark):
             return {}
 
         def read(self, start: dict) -> (Iterator[tuple], dict):
-            records, offset = self.lakeflow_connect.read_table(
-                self.options[TABLE_NAME], start, self.options
-            )
+            is_delete_flow = self.options.get(IS_DELETE_FLOW) == "true"
+            # Strip delete flow options before passing to connector
+            table_options = {
+                k: v for k, v in self.options.items() if k != IS_DELETE_FLOW
+            }
+
+            if is_delete_flow:
+                records, offset = self.lakeflow_connect.read_table_deletes(
+                    self.options[TABLE_NAME], start, table_options
+                )
+            else:
+                records, offset = self.lakeflow_connect.read_table(
+                    self.options[TABLE_NAME], start, table_options
+                )
             rows = map(lambda x: parse_value(x, self.schema), records)
             return rows, offset
 
