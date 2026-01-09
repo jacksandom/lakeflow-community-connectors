@@ -207,23 +207,23 @@ The connector includes predefined report configurations for common analytics nee
 
 **Available Prebuilt Reports:**
 
-| Report Name | Description | Dimensions | Metrics | Primary Keys |
-|-------------|-------------|------------|---------|--------------|
-| `traffic_by_country` | Daily active users, sessions, and page views by country | `date`, `country` | `activeUsers`, `sessions`, `screenPageViews` | `["property_id", "date", "country"]` |
-| `user_acquisition` | Daily traffic sources and campaign performance | `date`, `sessionSource`, `sessionMedium` | `sessions`, `activeUsers`, `newUsers`, `engagementRate` | `["property_id", "date", "sessionSource", "sessionMedium"]` |
-| `events_summary` | Daily event breakdown by event name | `date`, `eventName` | `eventCount`, `activeUsers` | `["property_id", "date", "eventName"]` |
-| `page_performance` | Daily page views by page path and title | `date`, `pagePath`, `pageTitle` | `screenPageViews`, `averageSessionDuration`, `bounceRate` | `["property_id", "date", "pagePath", "pageTitle"]` |
-| `device_breakdown` | Daily users by device category and browser | `date`, `deviceCategory`, `browser` | `activeUsers`, `sessions`, `engagementRate` | `["property_id", "date", "deviceCategory", "browser"]` |
-| `landing_page_performance` | Performance of the first page users land on | `date`, `landingPage` | `sessions`, `activeUsers`, `keyEvents`, `totalRevenue` | `["property_id", "date", "landingPage"]` |
-| `ecommerce_purchases` | Item-level performance for ecommerce sales | `date`, `itemName`, `itemId` | `itemsViewed`, `itemsPurchased`, `itemRevenue` | `["property_id", "date", "itemId"]` |
-| `purchase_journey` | User activity across shopping stages (View Item, Add to Cart, etc.) | `date`, `eventName` | `activeUsers`, `eventCount` | `["property_id", "date", "eventName"]` |
-| `checkout_journey` | Daily active users at specific checkout steps | `date`, `eventName` | `activeUsers`, `eventCount` | `["property_id", "date", "eventName"]` |
-| `promotions_performance` | Internal promotion views and revenue attribution | `date`, `itemPromotionName` | `itemsViewedInPromotion`, `itemRevenue` | `["property_id", "date", "itemPromotionName"]` |
-| `user_retention_simplified` | Comparison of New vs. Returning users over time | `date`, `newVsReturning` | `activeUsers`, `sessions`, `engagementRate` | `["property_id", "date", "newVsReturning"]` |
-| `demographic_details` | User breakdown by language and geographic location | `date`, `language`, `country` | `activeUsers`, `newUsers`, `engagedSessions` | `["property_id", "date", "country", "language"]` |
-| `audience_performance` | Performance metrics for defined user audiences | `date`, `audienceName` | `activeUsers`, `sessions`, `keyEvents` | `["property_id", "date", "audienceName"]` |
-| `tech_details` | Detailed breakdown of browsers and operating systems | `date`, `browser`, `operatingSystem` | `activeUsers`, `sessions`, `engagementRate` | `["property_id", "date", "browser", "operatingSystem"]` |
-| `advertising_channels` | Performance by channel group, ad cost, and ROAS | `date`, `defaultChannelGroup` | `keyEvents`, `advertiserAdCost`, `totalRevenue` | `["property_id", "date", "defaultChannelGroup"]` |
+| Report Name | Description | Dimensions | Metrics |
+|-------------|-------------|------------|---------|
+| `traffic_by_country` | Daily active users, sessions, and page views by country | `date`, `country` | `activeUsers`, `sessions`, `screenPageViews` |
+| `user_acquisition` | Daily traffic sources and campaign performance | `date`, `sessionSource`, `sessionMedium` | `sessions`, `activeUsers`, `newUsers`, `engagementRate` |
+| `events_summary` | Daily event breakdown by event name | `date`, `eventName` | `eventCount`, `activeUsers` |
+| `page_performance` | Daily page views by page path and title | `date`, `pagePath`, `pageTitle` | `screenPageViews`, `averageSessionDuration`, `bounceRate` |
+| `device_breakdown` | Daily users by device category and browser | `date`, `deviceCategory`, `browser` | `activeUsers`, `sessions`, `engagementRate` |
+| `landing_page_performance` | Performance of the first page users land on | `date`, `landingPage` | `sessions`, `activeUsers`, `keyEvents`, `totalRevenue` |
+| `ecommerce_purchases` | Item-level performance for ecommerce sales | `date`, `itemName`, `itemId` | `itemsViewed`, `itemsPurchased`, `itemRevenue` |
+| `purchase_journey` | User activity across shopping stages (View Item, Add to Cart, etc.) | `date`, `eventName` | `activeUsers`, `eventCount` |
+| `checkout_journey` | Daily active users at specific checkout steps | `date`, `eventName` | `activeUsers`, `eventCount` |
+| `promotions_performance` | Internal promotion views and revenue attribution | `date`, `itemPromotionName` | `itemsViewedInPromotion`, `itemRevenue` |
+| `user_retention_simplified` | Comparison of New vs. Returning users over time | `date`, `newVsReturning` | `activeUsers`, `sessions`, `engagementRate` |
+| `demographic_details` | User breakdown by language and geographic location | `date`, `language`, `country` | `activeUsers`, `newUsers`, `engagedSessions` |
+| `audience_performance` | Performance metrics for defined user audiences | `date`, `audienceName` | `activeUsers`, `sessions`, `keyEvents` |
+| `tech_details` | Detailed breakdown of browsers and operating systems | `date`, `browser`, `operatingSystem` | `activeUsers`, `sessions`, `engagementRate` |
+| `advertising_channels` | Performance by channel group, ad cost, and ROAS | `date`, `defaultChannelGroup` | `keyEvents`, `advertiserAdCost`, `totalRevenue` |
 
 > **Note**: The `property_id` field is **always automatically included** as the first element in primary keys for schema stability.
 
