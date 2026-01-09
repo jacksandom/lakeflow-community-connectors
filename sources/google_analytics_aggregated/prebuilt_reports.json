@@ -49,14 +49,14 @@
     "lookback_days": "3"
   },
   "purchase_journey": {
-    "description": "User drop-off through the shopping funnel",
+    "description": "User activity across shopping stages",
     "dimensions": "[\"date\", \"eventName\"]",
     "metrics": "[\"activeUsers\", \"eventCount\"]",
     "start_date": "30daysAgo",
     "lookback_days": "3"
   },
   "checkout_journey": {
-    "description": "Performance of checkout steps (shipping, payment, etc.)",
+    "description": "Daily active users at checkout steps",
     "dimensions": "[\"date\", \"eventName\"]",
     "metrics": "[\"activeUsers\", \"eventCount\"]",
     "start_date": "30daysAgo",
@@ -70,37 +70,37 @@
     "lookback_days": "3"
   },
   "user_retention": {
-    "description": "Active users and cohort retention",
-    "dimensions": "[\"cohort\", \"cohortNthDay\"]",
-    "metrics": "[\"cohortActiveUsers\"]",
+    "description": "Comparison of new vs returning users (standard report compatible)",
+    "dimensions": "[\"date\", \"newVsReturning\"]",
+    "metrics": "[\"activeUsers\", \"sessions\", \"engagementRate\"]",
     "start_date": "30daysAgo",
     "lookback_days": "3"
   },
   "demographic_details": {
-    "description": "User breakdown by language, age, and gender",
-    "dimensions": "[\"date\", \"language\", \"userAgeBracket\", \"userGender\"]",
-    "metrics": "[\"activeUsers\", \"newUsers\", \"engagedSessions\", \"totalRevenue\"]",
+    "description": "User breakdown by language and location",
+    "dimensions": "[\"date\", \"language\", \"country\"]",
+    "metrics": "[\"activeUsers\", \"newUsers\", \"engagedSessions\"]",
     "start_date": "30daysAgo",
     "lookback_days": "3"
   },
   "audience_performance": {
     "description": "Performance metrics for defined user audiences",
     "dimensions": "[\"date\", \"audienceName\"]",
-    "metrics": "[\"activeUsers\", \"sessions\", \"keyEvents\", \"totalRevenue\"]",
+    "metrics": "[\"activeUsers\", \"sessions\", \"keyEvents\"]",
     "start_date": "30daysAgo",
     "lookback_days": "3"
   },
   "tech_details": {
-    "description": "Detailed breakdown of browsers, OS, and screen resolution",
-    "dimensions": "[\"date\", \"browser\", \"operatingSystem\", \"screenResolution\"]",
+    "description": "Breakdown of browsers and operating systems",
+    "dimensions": "[\"date\", \"browser\", \"operatingSystem\"]",
     "metrics": "[\"activeUsers\", \"sessions\", \"engagementRate\"]",
     "start_date": "30daysAgo",
     "lookback_days": "3"
   },
   "advertising_channels": {
-    "description": "Advertising performance by channel group and ad cost",
+    "description": "Performance by channel group and ad cost",
     "dimensions": "[\"date\", \"defaultChannelGroup\"]",
-    "metrics": "[\"keyEvents\", \"advertiserAdCost\", \"totalRevenue\", \"returnOnAdSpend\"]",
+    "metrics": "[\"keyEvents\", \"advertiserAdCost\", \"totalRevenue\"]",
     "start_date": "30daysAgo",
     "lookback_days": "3"
   }
