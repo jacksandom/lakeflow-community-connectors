@@ -685,19 +685,10 @@ The connector uses the following Google Analytics Data API endpoints:
   - Validates API limits (9 dimensions max, 10 metrics max)
   - Catches errors before making expensive data requests
 
-### Design Decisions
-
-- **Type Inference via `getMetadata`**: See `VALIDATION_RATIONALE.md` for why we use lightweight validation instead of `checkCompatibility` API
-- **Individual Reports vs. Batch**: See `BATCH_RATIONALE.md` for why we use individual `runReport` calls instead of `batchRunReports`
-
 ## References
 
 - Connector implementation: `sources/google_analytics_aggregated/google_analytics_aggregated.py`
 - Connector API documentation: `sources/google_analytics_aggregated/google_analytics_aggregated_api_doc.md`
-- Design decisions:
-  - `VALIDATION_RATIONALE.md` - Why lightweight validation is used
-  - `BATCH_RATIONALE.md` - Why individual reports are used
-  - `TEST_SUMMARY.md` - Comprehensive test results
 - Official Google Analytics Data API documentation:
   - [Google Analytics Data API Overview](https://developers.google.com/analytics/devguides/reporting/data/v1)
   - [getMetadata Method Reference](https://developers.google.com/analytics/devguides/reporting/data/v1/rest/v1beta/properties/getMetadata)
