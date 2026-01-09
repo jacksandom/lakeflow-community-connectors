@@ -214,12 +214,12 @@ The connector includes predefined report configurations for common analytics nee
 | `events_summary` | Daily event breakdown by event name | `date`, `eventName` | `eventCount`, `activeUsers` |
 | `page_performance` | Daily page views by page path and title | `date`, `pagePath`, `pageTitle` | `screenPageViews`, `averageSessionDuration`, `bounceRate` |
 | `device_breakdown` | Daily users by device category and browser | `date`, `deviceCategory`, `browser` | `activeUsers`, `sessions`, `engagementRate` |
-| `landing_page_performance` | Performance of the first page users land on | `date`, `landingPage` | `sessions`, `activeUsers`, `keyEvents`, `totalRevenue` |
-| `ecommerce_purchases` | Item-level performance for ecommerce sales | `date`, `itemName`, `itemId` | `itemsViewed`, `itemsPurchased`, `itemRevenue` |
+| `landing_page_performance` | Performance of the first page users land on | `date`, `landingPage` | `sessions`, `activeUsers`, `newUsers`, `keyEvents`, `totalRevenue` |
+| `ecommerce_purchases` | Item-level performance for ecommerce sales | `date`, `itemName`, `itemId` | `itemsViewed`, `itemsAddedToCart`, `itemsPurchased`, `itemRevenue` |
 | `purchase_journey` | User activity across shopping stages (View Item, Add to Cart, etc.) | `date`, `eventName` | `activeUsers`, `eventCount` |
 | `checkout_journey` | Daily active users at specific checkout steps | `date`, `eventName` | `activeUsers`, `eventCount` |
-| `promotions_performance` | Internal promotion views and revenue attribution | `date`, `itemPromotionName` | `itemsViewedInPromotion`, `itemRevenue` |
-| `user_retention_simplified` | Comparison of New vs. Returning users over time | `date`, `newVsReturning` | `activeUsers`, `sessions`, `engagementRate` |
+| `promotions_performance` | Internal promotion clicks and views | `date`, `itemPromotionName` | `itemsViewedInPromotion`, `itemsClickedInPromotion`, `itemRevenue` |
+| `user_retention` | Comparison of new vs returning users | `date`, `newVsReturning` | `activeUsers`, `sessions`, `engagementRate` |
 | `demographic_details` | User breakdown by language and geographic location | `date`, `language`, `country` | `activeUsers`, `newUsers`, `engagedSessions` |
 | `audience_performance` | Performance metrics for defined user audiences | `date`, `audienceName` | `activeUsers`, `sessions`, `keyEvents` |
 | `tech_details` | Detailed breakdown of browsers and operating systems | `date`, `browser`, `operatingSystem` | `activeUsers`, `sessions`, `engagementRate` |
@@ -263,7 +263,7 @@ No `table_configuration` needed. The connector automatically knows:
 
 > **Reserved Names**: Prebuilt report names are reserved for automatic configuration. To use a custom report with a prebuilt name, explicitly provide `dimensions` in `table_configuration` (though a different name is recommended to avoid confusion).
 
-> **Note**: The connector ships with 5 prebuilt reports covering common analytics use cases. More reports can be added to `prebuilt_reports.json` as needed. You can also request additional common reports to be included.
+> **Note**: The connector ships with 15 prebuilt reports covering common analytics use cases. More reports can be added to `prebuilt_reports.json` as needed.
 
 ### 2. Custom Reports (For Specific Needs)
 

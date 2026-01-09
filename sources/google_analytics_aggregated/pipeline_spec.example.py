@@ -19,7 +19,7 @@ source_name = "google_analytics_aggregated"
 #    - Use the prebuilt report name as the source_table
 #    - No table_configuration needed
 #    - Dimensions, metrics, and primary_keys are automatically configured
-#    - Available reports: traffic_by_country
+#    - See "AVAILABLE PREBUILT REPORTS" section below for all 15 reports
 #    - Can override any settings (start_date, lookback_days, filters, etc.)
 #
 # 2. CUSTOM REPORTS (For specific needs)
@@ -128,13 +128,32 @@ pipeline_spec = {
 }
 
 # =============================================================================
-# AVAILABLE PREBUILT REPORTS (5 reports)
+# AVAILABLE PREBUILT REPORTS (15 reports)
 # =============================================================================
+# Traffic & Acquisition:
 # - traffic_by_country: Daily active users, sessions, and page views by country
 # - user_acquisition: Daily traffic sources and campaign performance
+# - landing_page_performance: Performance of the first page users land on
+#
+# Engagement:
 # - events_summary: Daily event breakdown by event name
 # - page_performance: Daily page views by page path and title
 # - device_breakdown: Daily users by device category and browser
+# - tech_details: Detailed breakdown of browsers and operating systems
+#
+# Ecommerce:
+# - ecommerce_purchases: Item-level performance for ecommerce sales
+# - purchase_journey: User activity across shopping stages
+# - checkout_journey: Daily active users at specific checkout steps
+# - promotions_performance: Internal promotion clicks and views
+#
+# Users:
+# - user_retention: Comparison of new vs returning users
+# - demographic_details: User breakdown by language and location
+# - audience_performance: Performance metrics for defined audiences
+#
+# Advertising:
+# - advertising_channels: Performance by channel group, ad cost, and ROAS
 #
 # To use a prebuilt report, just use its name as the source_table
 # No need to specify dimensions, metrics, or primary keys - it's all automatic.

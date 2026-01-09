@@ -1116,6 +1116,7 @@ Use the `getMetadata` API to infer proper data types:
 | Official Docs | https://developers.google.com/analytics/devguides/reporting/data/v1/rest/v1alpha/DateRange | 2024-12-30 | High | Documents 4 date ranges limit per request (v1alpha, confirmed in v1beta via empirical testing) |
 | Third-Party Docs | https://docs.aws.amazon.com/glue/latest/dg/googleanalytics-connector-limitations.html | 2024-12-30 | Medium | Documents 9 dimensions and 10 metrics limits per request for GA4 API (enforced by Google Analytics API but not explicitly documented by Google) |
 | Official Docs | https://developers.google.com/analytics/devguides/reporting/data/v1/api-schema | 2026-01-07 | High | Confirmed all date/time dimensions: date (YYYYMMDD), firstSessionDate (YYYYMMDD), dateHour (YYYYMMDDHH), dateHourMinute (YYYYMMDDHHmm) and their formats |
+| Official Docs | https://developers.google.com/analytics/devguides/reporting/data/v1/predefined-reports | 2026-01-09 | High | Reference for prebuilt report configurations matching GA4 UI reports (Life cycle, User, Tech, Advertising categories) |
 
 
 ## **Sources and References**
@@ -1131,6 +1132,7 @@ Use the `getMetadata` API to infer proper data types:
 - Metadata API: https://developers.google.com/analytics/devguides/reporting/data/v1/rest/v1beta/properties/getMetadata
 - Quotas and Limits: https://developers.google.com/analytics/devguides/reporting/data/v1/quotas
 - Authentication: https://developers.google.com/analytics/devguides/reporting/data/v1/quickstart-client-libraries
+- Predefined Reports (GA4 UI equivalents): https://developers.google.com/analytics/devguides/reporting/data/v1/predefined-reports
 
 ### **Confidence Assessment**
 
