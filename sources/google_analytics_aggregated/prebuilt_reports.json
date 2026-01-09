@@ -33,5 +33,75 @@
     "metrics": "[\"activeUsers\", \"sessions\", \"engagementRate\"]",
     "start_date": "30daysAgo",
     "lookback_days": "3"
+  },
+  "landing_page_performance": {
+    "description": "Performance of the first page users land on",
+    "dimensions": "[\"date\", \"landingPage\"]",
+    "metrics": "[\"sessions\", \"activeUsers\", \"newUsers\", \"keyEvents\", \"totalRevenue\"]",
+    "start_date": "30daysAgo",
+    "lookback_days": "3"
+  },
+  "ecommerce_purchases": {
+    "description": "Item-level performance for ecommerce sales",
+    "dimensions": "[\"date\", \"itemName\", \"itemId\"]",
+    "metrics": "[\"itemsViewed\", \"itemsAddedToCart\", \"itemsPurchased\", \"itemRevenue\"]",
+    "start_date": "30daysAgo",
+    "lookback_days": "3"
+  },
+  "purchase_journey": {
+    "description": "User drop-off through the shopping funnel",
+    "dimensions": "[\"date\", \"eventName\"]",
+    "metrics": "[\"activeUsers\", \"eventCount\"]",
+    "start_date": "30daysAgo",
+    "lookback_days": "3"
+  },
+  "checkout_journey": {
+    "description": "Performance of checkout steps (shipping, payment, etc.)",
+    "dimensions": "[\"date\", \"eventName\"]",
+    "metrics": "[\"activeUsers\", \"eventCount\"]",
+    "start_date": "30daysAgo",
+    "lookback_days": "3"
+  },
+  "promotions_performance": {
+    "description": "Internal promotion clicks and views",
+    "dimensions": "[\"date\", \"itemPromotionName\"]",
+    "metrics": "[\"itemsViewedInPromotion\", \"itemsClickedInPromotion\", \"itemRevenue\"]",
+    "start_date": "30daysAgo",
+    "lookback_days": "3"
+  },
+  "user_retention": {
+    "description": "Active users and cohort retention",
+    "dimensions": "[\"cohort\", \"cohortNthDay\"]",
+    "metrics": "[\"cohortActiveUsers\"]",
+    "start_date": "30daysAgo",
+    "lookback_days": "3"
+  },
+  "demographic_details": {
+    "description": "User breakdown by language, age, and gender",
+    "dimensions": "[\"date\", \"language\", \"userAgeBracket\", \"userGender\"]",
+    "metrics": "[\"activeUsers\", \"newUsers\", \"engagedSessions\", \"totalRevenue\"]",
+    "start_date": "30daysAgo",
+    "lookback_days": "3"
+  },
+  "audience_performance": {
+    "description": "Performance metrics for defined user audiences",
+    "dimensions": "[\"date\", \"audienceName\"]",
+    "metrics": "[\"activeUsers\", \"sessions\", \"keyEvents\", \"totalRevenue\"]",
+    "start_date": "30daysAgo",
+    "lookback_days": "3"
+  },
+  "tech_details": {
+    "description": "Detailed breakdown of browsers, OS, and screen resolution",
+    "dimensions": "[\"date\", \"browser\", \"operatingSystem\", \"screenResolution\"]",
+    "metrics": "[\"activeUsers\", \"sessions\", \"engagementRate\"]",
+    "start_date": "30daysAgo",
+    "lookback_days": "3"
+  },
+  "advertising_channels": {
+    "description": "Advertising performance by channel group and ad cost",
+    "dimensions": "[\"date\", \"defaultChannelGroup\"]",
+    "metrics": "[\"keyEvents\", \"advertiserAdCost\", \"totalRevenue\", \"returnOnAdSpend\"]",
+    "start_date": "30daysAgo",
+    "lookback_days": "3"
   }
 }

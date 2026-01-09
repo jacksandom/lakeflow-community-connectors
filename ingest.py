@@ -1,6 +1,7 @@
 from pipeline.ingestion_pipeline import ingest
 from libs.source_loader import get_register_function
 
+
 source_name = "google_analytics_aggregated"
 
 # =============================================================================
@@ -41,7 +42,7 @@ source_name = "google_analytics_aggregated"
 #         ├── destination_schema (optional): Target schema
 #         ├── destination_table (optional): Target table name (defaults to source_table)
 #         └── table_configuration (optional for prebuilt, required for custom): Report settings
-#             
+#
 #             FOR PREBUILT REPORTS (Optional - only to override defaults):
 #             ├── start_date (optional): Override default "30daysAgo"
 #             ├── lookback_days (optional): Override default 3
@@ -49,7 +50,7 @@ source_name = "google_analytics_aggregated"
 #             ├── metric_filter (optional): Add filters
 #             ├── page_size (optional): Override default 10000
 #             ├── scd_type (optional): Override default "SCD_TYPE_1"
-#             
+#
 #             FOR CUSTOM REPORTS (Required):
 #             ├── dimensions (required): JSON array e.g., '["date", "country"]'
 #             ├── metrics (required): JSON array e.g., '["activeUsers", "sessions"]'
@@ -76,7 +77,147 @@ reports = [
             # }
         }
     },
-    
+    {
+        "table": {
+            "source_table": "user_acquisition",  # Matches prebuilt report name
+            # No table_configuration needed - dimensions, metrics, and primary keys are automatic
+            # Optionally override defaults like start_date, lookback_days, filters:
+            # "table_configuration": {
+            #     "start_date": "90daysAgo",
+            # }
+        }
+    },
+    {
+        "table": {
+            "source_table": "events_summary",  # Matches prebuilt report name
+            # No table_configuration needed - dimensions, metrics, and primary keys are automatic
+            # Optionally override defaults like start_date, lookback_days, filters:
+            # "table_configuration": {
+            #     "start_date": "90daysAgo",
+            # }
+        }
+    },
+    {
+        "table": {
+            "source_table": "page_performance",  # Matches prebuilt report name
+            # No table_configuration needed - dimensions, metrics, and primary keys are automatic
+            # Optionally override defaults like start_date, lookback_days, filters:
+            # "table_configuration": {
+            #     "start_date": "90daysAgo",
+            # }
+        }
+    },
+    {
+        "table": {
+            "source_table": "device_breakdown",  # Matches prebuilt report name
+            # No table_configuration needed - dimensions, metrics, and primary keys are automatic
+            # Optionally override defaults like start_date, lookback_days, filters:
+            # "table_configuration": {
+            #     "start_date": "90daysAgo",
+            # }
+        }
+    },
+    {
+        "table": {
+            "source_table": "landing_page_performance",  # Matches prebuilt report name
+            # No table_configuration needed - dimensions, metrics, and primary keys are automatic
+            # Optionally override defaults like start_date, lookback_days, filters:
+            # "table_configuration": {
+            #     "start_date": "90daysAgo",
+            # }
+        }
+    },
+    {
+        "table": {
+            "source_table": "ecommerce_purchases",  # Matches prebuilt report name
+            # No table_configuration needed - dimensions, metrics, and primary keys are automatic
+            # Optionally override defaults like start_date, lookback_days, filters:
+            # "table_configuration": {
+            #     "start_date": "90daysAgo",
+            # }
+        }
+    },
+    {
+        "table": {
+            "source_table": "purchase_journey",  # Matches prebuilt report name
+            # No table_configuration needed - dimensions, metrics, and primary keys are automatic
+            # Optionally override defaults like start_date, lookback_days, filters:
+            # "table_configuration": {
+            #     "start_date": "90daysAgo",
+            # }
+        }
+    },
+    {
+        "table": {
+            "source_table": "checkout_journey",  # Matches prebuilt report name
+            # No table_configuration needed - dimensions, metrics, and primary keys are automatic
+            # Optionally override defaults like start_date, lookback_days, filters:
+            # "table_configuration": {
+            #     "start_date": "90daysAgo",
+            # }
+        }
+    },
+    {
+        "table": {
+            "source_table": "promotions_performance",  # Matches prebuilt report name
+            # No table_configuration needed - dimensions, metrics, and primary keys are automatic
+            # Optionally override defaults like start_date, lookback_days, filters:
+            # "table_configuration": {
+            #     "start_date": "90daysAgo",
+            # }
+        }
+    },
+    {
+        "table": {
+            "source_table": "user_retention",  # Matches prebuilt report name
+            # No table_configuration needed - dimensions, metrics, and primary keys are automatic
+            # Optionally override defaults like start_date, lookback_days, filters:
+            # "table_configuration": {
+            #     "start_date": "90daysAgo",
+            # }
+        }
+    },
+    {
+        "table": {
+            "source_table": "demographic_details",  # Matches prebuilt report name
+            # No table_configuration needed - dimensions, metrics, and primary keys are automatic
+            # Optionally override defaults like start_date, lookback_days, filters:
+            # "table_configuration": {
+            #     "start_date": "90daysAgo",
+            # }
+        }
+    },
+    {
+        "table": {
+            "source_table": "audience_performance",  # Matches prebuilt report name
+            # No table_configuration needed - dimensions, metrics, and primary keys are automatic
+            # Optionally override defaults like start_date, lookback_days, filters:
+            # "table_configuration": {
+            #     "start_date": "90daysAgo",
+            # }
+        }
+    },
+    {
+        "table": {
+            "source_table": "tech_details",  # Matches prebuilt report name
+            # No table_configuration needed - dimensions, metrics, and primary keys are automatic
+            # Optionally override defaults like start_date, lookback_days, filters:
+            # "table_configuration": {
+            #     "start_date": "90daysAgo",
+            # }
+        }
+    },
+    {
+        "table": {
+            "source_table": "advertising_channels",  # Matches prebuilt report name
+            # No table_configuration needed - dimensions, metrics, and primary keys are automatic
+            # Optionally override defaults like start_date, lookback_days, filters:
+            # "table_configuration": {
+            #     "start_date": "90daysAgo",
+            # }
+        }
+    },
+
     # Example 2: Custom report with engagement metrics
     {
         "table": {
@@ -90,7 +231,7 @@ reports = [
             },
         }
     },
-    
+
     # Example 3: Custom report with filters
     {
         "table": {
@@ -100,15 +241,17 @@ reports = [
                 "metrics": '["sessions"]',
                 "start_date": "7daysAgo",
                 "lookback_days": "3",
-                "dimension_filter": '{"filter": {"fieldName": "platform", "stringFilter": {"matchType": "EXACT", "value": "web"}}}',
+                # Filter to only include web traffic
+                "dimension_filter": '{"filter": {"fieldName": "platform", '
+                                    '"stringFilter": {"matchType": "EXACT", "value": "web"}}}',
             },
         }
     },
-    
+
     # Example 4: Custom snapshot report (no date dimension)
     {
         "table": {
-            "source_table": "all_time_by_country", 
+            "source_table": "all_time_by_country",
             "table_configuration": {
                 "dimensions": '["country"]',
                 "metrics": '["totalUsers", "sessions"]',
@@ -121,7 +264,7 @@ reports = [
 
 # Build the final pipeline spec
 pipeline_spec = {
-    "connection_name": "camille_ga4_test",
+    "connection_name": "jack_ga4_test",
     "objects": reports,
 }
 

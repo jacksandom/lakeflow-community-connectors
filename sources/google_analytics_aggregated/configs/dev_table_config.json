@@ -2,9 +2,91 @@
     "traffic_by_country": {
         "dimensions": "[\"date\", \"country\"]",
         "metrics": "[\"activeUsers\", \"sessions\"]",
-        "primary_keys": ["property_id", "date", "country"],
         "start_date": "7daysAgo",
+        "lookback_days": "3"
+    },
+    "user_acquisition": {
+        "dimensions": "[\"firstUserDefaultChannelGroup\"]",
+        "metrics": "[\"newUsers\", \"engagedSessions\", \"engagementRate\", \"eventCount\", \"keyEvents\", \"totalRevenue\"]",
+        "start_date": "28daysAgo",
+        "lookback_days": "3"
+    },
+    "traffic_acquisition": {
+        "dimensions": "[\"sessionDefaultChannelGroup\"]",
+        "metrics": "[\"activeUsers\", \"sessions\", \"engagedSessions\", \"engagementRate\", \"eventCount\", \"keyEvents\", \"totalRevenue\"]",
+        "start_date": "28daysAgo",
+        "lookback_days": "3"
+    },
+    "events_report": {
+        "dimensions": "[\"eventName\"]",
+        "metrics": "[\"eventCount\", \"totalUsers\", \"eventCountPerUser\", \"totalRevenue\"]",
+        "start_date": "28daysAgo",
+        "lookback_days": "3"
+    },
+    "pages_and_screens": {
+        "dimensions": "[\"pagePathPlusQueryString\"]",
+        "metrics": "[\"screenPageViews\", \"activeUsers\", \"screenPageViewsPerUser\", \"eventCount\", \"totalRevenue\"]",
+        "start_date": "28daysAgo",
+        "lookback_days": "3"
+    },
+    "landing_page": {
+        "dimensions": "[\"landingPage\"]",
+        "metrics": "[\"sessions\", \"activeUsers\", \"newUsers\", \"keyEvents\", \"totalRevenue\"]",
+        "start_date": "28daysAgo",
+        "lookback_days": "3"
+    },
+    "ecommerce_purchases": {
+        "dimensions": "[\"itemName\"]",
+        "metrics": "[\"itemsViewed\", \"itemsAddedToCart\", \"itemsPurchased\", \"itemRevenue\"]",
+        "start_date": "28daysAgo",
+        "lookback_days": "3"
+    },
+    "purchase_journey": {
+        "dimensions": "[\"eventName\"]",
+        "metrics": "[\"activeUsers\", \"eventCount\"]",
+        "start_date": "28daysAgo",
+        "lookback_days": "3"
+    },
+    "promotions": {
+        "dimensions": "[\"itemPromotionName\"]",
+        "metrics": "[\"itemsViewedInPromotion\", \"itemsClickedInPromotion\", \"itemRevenue\"]",
+        "start_date": "28daysAgo",
+        "lookback_days": "3"
+    },
+    "checkout_journey": {
+        "dimensions": "[\"eventName\"]",
+        "metrics": "[\"activeUsers\", \"eventCount\"]",
+        "start_date": "28daysAgo",
+        "lookback_days": "3"
+    },
+    "user_retention": {
+        "dimensions": "[\"cohort\", \"cohortNthDay\"]",
+        "metrics": "[\"cohortActiveUsers\"]",
+        "start_date": "28daysAgo",
+        "lookback_days": "3"
+    },
+    "demographic_details": {
+        "dimensions": "[\"country\"]",
+        "metrics": "[\"activeUsers\", \"newUsers\", \"engagedSessions\", \"eventCount\", \"totalRevenue\"]",
+        "start_date": "28daysAgo",
+        "lookback_days": "3"
+    },
+    "audiences": {
+        "dimensions": "[\"audienceName\"]",
+        "metrics": "[\"activeUsers\", \"newUsers\", \"sessions\", \"totalRevenue\"]",
+        "start_date": "28daysAgo",
+        "lookback_days": "3"
+    },
+    "tech_details": {
+        "dimensions": "[\"browser\"]",
+        "metrics": "[\"activeUsers\", \"newUsers\", \"engagedSessions\", \"totalRevenue\"]",
+        "start_date": "28daysAgo",
+        "lookback_days": "3"
+    },
+    "advertising_all_channels": {
+        "dimensions": "[\"defaultChannelGroup\"]",
+        "metrics": "[\"keyEvents\", \"advertiserAdCost\", \"totalRevenue\", \"returnOnAdSpend\"]",
+        "start_date": "28daysAgo",
         "lookback_days": "3"
     }
 }
-
